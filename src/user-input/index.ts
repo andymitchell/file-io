@@ -1,6 +1,6 @@
 import { UserInputNode } from "./UserInputNode";
 import { getDirectoryFromUser } from "./common/getDirectoryFromUser";
-import { IUserInput, QuestionChain } from "./types";
+import { IUserInput, QuestionChain, QuestionChoice } from "./types";
 
 export {
     UserInputNode,
@@ -9,5 +9,6 @@ export {
 
 export type {
     IUserInput,
-    QuestionChain
+    QuestionChain,
+    QuestionChoice
 }
