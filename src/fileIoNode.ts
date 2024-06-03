@@ -77,6 +77,7 @@ export const fileIoNode:IFileIo = {
                 await fs.rmdir(absolutePathToDirectory);
             }
         } catch(e) {
+            debugger;
             throw new Error(`Cannot remove directory ${absolutePathToDirectory}. Error: ${getErrorMessage(e)}`);
         }
     },
@@ -139,6 +140,13 @@ export const fileIoNode:IFileIo = {
 function getErrorMessage(e:unknown) {
     if( e instanceof Error ) {
         return e.message;
+    } else if( typeof e==='object' && !!e && "message" in e && typeof e.message==='string' ) {
+        return e.message;
     }
+    try {
+        const json = JSON.stringify(e);
+        return json;
+    } catch(je) {}
+    
     return 'na';
 }
