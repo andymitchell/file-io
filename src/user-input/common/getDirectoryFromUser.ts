@@ -1,4 +1,5 @@
-import { IFileIo } from "../../file-system";
+
+import { IFileIo } from "../../types";
 import { IUserInput, QuestionChoice } from "../types";
 
 export async function getDirectoryFromUser(userInput:IUserInput, fileSystem:IFileIo, currentDirectory:string, name: string, message:string, suggestedDirs:string[]) {

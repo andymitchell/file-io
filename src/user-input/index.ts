@@ -1,10 +1,13 @@
 import { UserInputNode } from "./UserInputNode";
-import { IUserInput } from "./types";
+import { getDirectoryFromUser } from "./common/getDirectoryFromUser";
+import { IUserInput, QuestionChain } from "./types";
 
 export {
-    UserInputNode
+    UserInputNode,
+    getDirectoryFromUser
 }
 
 export type {
-    IUserInput
+    IUserInput,
+    QuestionChain
 }
