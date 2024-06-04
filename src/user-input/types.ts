@@ -32,7 +32,7 @@ export type QuestionChain = QuestionChainToString | QuestionChainToStringArray;
 
 export type Answer = {type: 'single', answer: string, name?: string} | 
 {type: 'multi', answer: string[], name?: string} |
-{type: 'abort', answer: undefined}
+{type: 'abort', answer: undefined, name?: string}
 
 export interface IUserInput {
     ask(questionChain: QuestionChain): Promise<Answer>

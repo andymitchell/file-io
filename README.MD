@@ -6,7 +6,8 @@ It's intended to be cross-environment, but currently is only for Node.
 
 ## Roadmap
 
-- Support Deno
+### Support Deno
+
 
 ## Build 
 

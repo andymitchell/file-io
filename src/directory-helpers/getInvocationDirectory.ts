@@ -5,6 +5,10 @@ import { stripTrailingSlash } from './stripTrailingSlash';
  * E.g. if invoked as "node ./dist/main.js", this will return "<path to .>"
  * @returns 
  */
-export function getInvocationDirectory() {
+export function getInvocationDirectorySync() {
     return stripTrailingSlash(cwd());
+}
+
+export async function getInvocationDirectory() {
+    return getInvocationDirectorySync();
 }

@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
 import { exec } from 'child_process';
 import {dirname} from 'path';
+import { getErrorMessage } from "./utils/getErrorMessage";
 
 
 export const fileIoNode:IFileIo = {
@@ -63,17 +64,22 @@ export const fileIoNode:IFileIo = {
     },
     async remove_directory(absolutePathToDirectory, force) {
         try {
-            if( !await fileIoNode.has_directory(absolutePathToDirectory) ) return;
+            if( !(await fileIoNode.has_directory(absolutePathToDirectory)) ) {
+                debugger;
+                return;
+            }
 
             const files = await fs.readdir(absolutePathToDirectory, {'recursive': true});
-            if (files.length === 0 && !force) {
-                console.log(`Directory ${absolutePathToDirectory} is empty. Skipping deletion.`);
+            if (files.length > 0 && !force) {
+                console.log(`Directory ${absolutePathToDirectory} is not empty. Skipping deletion.`);
+                debugger;
                 return;
             }
 
             if( force ) {
                 await fs.rm(absolutePathToDirectory, {recursive: true, force: true});
             } else {
+                debugger;
                 await fs.rmdir(absolutePathToDirectory);
             }
         } catch(e) {
@@ -131,22 +137,8 @@ export const fileIoNode:IFileIo = {
             throw new Error(`Cannot execute file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);
         }
     },
-    directory_name(absolutePathToFileOrDirectory) {
+    async directory_name(absolutePathToFileOrDirectory) {
         return dirname(absolutePathToFileOrDirectory);
     },
 };
 
-
-function getErrorMessage(e:unknown) {
-    if( e instanceof Error ) {
-        return e.message;
-    } else if( typeof e==='object' && !!e && "message" in e && typeof e.message==='string' ) {
-        return e.message;
-    }
-    try {
-        const json = JSON.stringify(e);
-        return json;
-    } catch(je) {}
-    
-    return 'na';
-}

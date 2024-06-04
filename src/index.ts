@@ -1,12 +1,15 @@
 import { fileIoNode } from './fileIoNode';
-import { IFileIo } from './types';
+import { fileIoSyncNode } from './fileIoSyncNode';
+import { IFileIo, IFileIoSync } from './types';
 
 export {
-    fileIoNode
+    fileIoNode,
+    fileIoSyncNode
 }
 
 export type {
     IFileIo,
+    IFileIoSync
 }
 
 export * from './user-input';
