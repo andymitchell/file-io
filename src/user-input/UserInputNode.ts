@@ -19,4 +19,10 @@ export class UserInputNode extends BaseUserInput implements IUserInput {
         return response[question.name];
     }
 
+    protected async promptMulti(question:QuestionChain):Promise<string[]> {
+        
+        const response = await inquirer.prompt(question);
+        return response[question.name];
+    }
+
 }

@@ -1,7 +1,10 @@
 
-export type QuestionChoice = {
+type QuestionChoiceBasic = {
     type: 'choice',
     name: string,
+}
+
+export type QuestionChoice = QuestionChoiceBasic & {
     next?: QuestionChain
 } | {
     type: 'separator'
@@ -12,14 +15,26 @@ type BaseQuestionChain = {
     validate?: (input: any) => string | boolean | Promise<string | boolean>
     filter?: (input: string) => string | Promise<string>
 }
-export type QuestionChain = BaseQuestionChain & {
+type QuestionChainToString = BaseQuestionChain & {
     type: 'list',
     choices: QuestionChoice[],
 } | BaseQuestionChain & {
+    type: 'rawlist',
+    choices: QuestionChoice[],
+} | BaseQuestionChain & {
     type: 'input',
-}
+};
+type QuestionChainToStringArray = BaseQuestionChain & {
+    type: 'checkbox',
+    choices: QuestionChoiceBasic[],
+};
+export type QuestionChain = QuestionChainToString | QuestionChainToStringArray;
+
+export type Answer = {type: 'single', answer: string, name?: string} | 
+{type: 'multi', answer: string[], name?: string} |
+{type: 'abort'}
 
 export interface IUserInput {
-    ask(questionChain: QuestionChain): Promise<string | undefined>;
+    ask(questionChain: QuestionChain): Promise<Answer>
     close(): void;
 }
