@@ -11,11 +11,11 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
     
     let TMP_DIR:string;
     beforeAll(async () => {
-        TMP_DIR = `${await getPackageDirectoryForSelfInTesting()}/tmp_ifileio_tests`;
-        if( existsSync(TMP_DIR) ) rmdirSync(TMP_DIR, { recursive: true });
+        TMP_DIR = `${getPackageDirectoryForSelfInTesting()}/tmp_ifileio_tests_${Math.round(Math.random()*10000)+''}`;
+        rmSync(TMP_DIR, { recursive: true, force: true });
     });
     afterAll(async () => {
-        if( existsSync(TMP_DIR) ) rmdirSync(TMP_DIR, { recursive: true });
+        rmSync(TMP_DIR, { recursive: true, force: true });
     });
 
     beforeEach(() => {
@@ -25,9 +25,7 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
     });
     
     afterEach(() => {
-        if (existsSync(TMP_DIR)) {
-            rmdirSync(TMP_DIR, { recursive: true });
-        }
+        rmSync(TMP_DIR, { recursive: true, force: true });
     });
 
     test('reads a file', async () => {
