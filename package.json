@@ -37,7 +37,8 @@
     "prepublishOnly": "npm run build_prepare",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test_cli:user_input": "npx tsup-node --no-config --format esm --entry.test_cli_user_input ./src/user-input/examples/index.ts && node ./dist/test_cli_user_input.mjs && rm ./dist/test_cli_user_input.mjs"
+    "test_cli:user_input": "npx tsup-node --no-config --format esm --entry.test_cli_user_input ./src/user-input/examples/index.ts && node ./dist/test_cli_user_input.mjs && rm ./dist/test_cli_user_input.mjs",
+    "test_cli:spawn_like_exec": "npx tsup-node --no-config --format esm --entry.test_cli_spawn_like_exec ./src/utils/spawnLikeExec.example.ts && node ./dist/test_cli_spawn_like_exec.mjs && rm ./dist/test_cli_spawn_like_exec.mjs"
   },
   "author": "andymitchell",
   "license": "MIT",

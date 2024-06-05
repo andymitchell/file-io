@@ -4,6 +4,7 @@ import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
 import { exec } from 'child_process';
 import {dirname} from 'path';
 import { getErrorMessage } from "./utils/getErrorMessage";
+import { spawnLikeExec } from "./utils/spawnLikeExec";
 
 
 export const fileIoNode:IFileIo = {
@@ -121,20 +122,19 @@ export const fileIoNode:IFileIo = {
             throw new Error(`Cannot chmod file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);
         }
     },
-    async execute_file(absolutePathToFile) {
+    async execute_file(absolutePathToFile, interactive?: boolean) {
         try {
             return await new Promise((resolve, reject) => {
-                exec(absolutePathToFile, (error, stdout) => {
+                (interactive? spawnLikeExec : exec)(absolutePathToFile, (error, stdout) => {
                     if( error ) {
-                        console.warn("File execution error for "+absolutePathToFile, error);
-                        reject(new Error(error.message));
+                        reject(new Error(`Code: ${error.code ?? 'na'}. Message: ${error.message}. Stderr: ${error.stderr ?? 'na'}`));
                     } else {
                         resolve(stdout);
                     }
                 });
             });
         } catch (e) {
-            throw new Error(`Cannot execute file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);
+            throw new Error(`Error executing ${absolutePathToFile}: ${getErrorMessage(e)}`);
         }
     },
     async directory_name(absolutePathToFileOrDirectory) {

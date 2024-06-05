@@ -116,8 +116,9 @@ export const fileIoSyncNode:IFileIoSync = {
             throw new Error(`Cannot chmod file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);
         }
     },
-    execute_file(absolutePathToFile) {
+    execute_file(absolutePathToFile, interactive?: boolean) {
         try {
+            if( interactive ) throw new Error("Interactive mode not supported in sync");
             return execSync(absolutePathToFile).toString();
         } catch (e) {
             throw new Error(`Cannot execute file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);

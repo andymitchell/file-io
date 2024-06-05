@@ -31,7 +31,7 @@ function runTests(getPackageDirectoryAny: typeof getPackageDirectory | typeof ge
 
     test('skip fake-this-pkg because it is is_andyrmitchell_file_io_package', async () => {
         const root = await getPackageDirectoryForSelfInTesting();
-        const dir = await getPackageDirectoryAny(`${root}/test-env/pkg-root/node_modules/fake-this-pkg`);
+        const dir = await getPackageDirectoryAny(`${root}/test-assets/pkg-root/node_modules/fake-this-pkg`);
         const parts = dir.split('/');
         expect(parts[parts.length-1]).toBe('pkg-root');
         

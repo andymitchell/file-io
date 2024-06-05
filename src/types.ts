@@ -20,7 +20,7 @@ export interface IFileIoSync {
     has_directory(absolutePathDirectory: string): boolean;
     has_file(absolutePathToFile: string): boolean;
     chmod_file(absolutePathToFile: string, permissions: string): void;
-    execute_file(absolutePathToFile: string): string
+    execute_file(absolutePathToFile: string, interactive:boolean): string
 }
 
 export interface IFileIo extends Asyncify<IFileIoSync> {};
