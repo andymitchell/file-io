@@ -12,17 +12,21 @@ export class UserInputNode extends BaseUserInput implements IUserInput {
         super(); 
     }
 
-    protected async prompt(question:QuestionChain):Promise<string | undefined> {
-        //const choicesText = questionChain.choices.map((choice, index) => `${index}. ${choice.choice}`).join("\n");
-        
+    private async _prompt<T>(question:QuestionChain):Promise<T> {        
         const response = await inquirer.prompt(question);
         return response[question.name];
     }
 
+    protected async prompt(question:QuestionChain):Promise<string | undefined> {
+        return await this._prompt<string | undefined>(question);
+    }
+
     protected async promptMulti(question:QuestionChain):Promise<string[]> {
-        
-        const response = await inquirer.prompt(question);
-        return response[question.name];
+        return await this._prompt<string[]>(question);
+    }
+
+    protected async promptBoolean(question:QuestionChain):Promise<boolean> {
+        return !!(await this._prompt<boolean | undefined>(question));
     }
 
 }

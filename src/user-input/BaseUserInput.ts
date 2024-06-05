@@ -13,6 +13,10 @@ export class BaseUserInput implements IUserInput {
         throw new Error("Method not implemented");
     }
 
+    protected async promptBoolean(question:QuestionChain):Promise<boolean> {
+        throw new Error("Method not implemented");
+    }
+
     async ask(question: QuestionChain): Promise<Answer> {
 
         if( question.type==='list' || question.type==='rawlist' ) {
@@ -33,6 +37,10 @@ export class BaseUserInput implements IUserInput {
         } else if( question.type==='input') {
             const result = await this.prompt(question);
             return result===undefined? {type: 'abort', answer: undefined} : {type: 'single', answer: result, name: question.name};
+            
+        } else if( question.type==='confirm') {
+            const result = await this.promptBoolean(question);
+            return result===undefined? {type: 'abort', answer: undefined} : {type: 'confirmation', answer: result, name: question.name};
             
         } else if ( question.type==='checkbox') {
             const answer = await this.promptMulti(question);

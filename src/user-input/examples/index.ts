@@ -72,10 +72,18 @@ async function main() {
         ]
     })
 
+    const result4 = await userInput.ask({
+        type: 'confirm',
+        name: "confirmerer",
+        message: "Shall we make it?",
+        default: false
+    })
+
     
     console.log(result);
     console.log(result2);
     console.log(result3);
+    console.log(result4);
 }
 
 

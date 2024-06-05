@@ -25,14 +25,19 @@ type QuestionChainToString = BaseQuestionChain & {
 } | BaseQuestionChain & {
     type: 'input',
 };
+type QuestionChainToBoolean = BaseQuestionChain & {
+    type: 'confirm',
+    default?:boolean
+};
 type QuestionChainToStringArray = BaseQuestionChain & {
     type: 'checkbox',
     choices: QuestionChoiceBasic[],
 };
-export type QuestionChain = QuestionChainToString | QuestionChainToStringArray;
+export type QuestionChain = QuestionChainToString | QuestionChainToStringArray | QuestionChainToBoolean;
 
 export type Answer = {type: 'single', answer: string, name?: string, meta?: unknown} | 
 {type: 'multi', answer: string[], name?: string, meta?: unknown} |
+{type: 'confirmation', answer: boolean, name?: string, meta?: unknown} |
 {type: 'abort', answer: undefined, name?: string, meta?: unknown}
 
 export interface IUserInput {
