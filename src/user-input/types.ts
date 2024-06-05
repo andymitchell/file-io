@@ -2,6 +2,7 @@
 type QuestionChoiceBasic = {
     type: 'choice',
     name: string,
+    meta?: any
 }
 
 export type QuestionChoice = QuestionChoiceBasic & {
