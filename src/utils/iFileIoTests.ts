@@ -37,6 +37,14 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
         expect(result).toBe(content);
     });
 
+    test('reads a file - missing is undefined', async () => {
+        const filePath = path.join(TMP_DIR, 'test-no-exists-4943.txt');
+        const content = 'Hello, world!';
+        
+        const result = await fileIo.read(filePath);
+        expect(result).toBe(undefined);
+    });
+
     test('writes to a file', async () => {
         const filePath = path.join(TMP_DIR, 'test.txt');
         const content = 'Hello, world!';

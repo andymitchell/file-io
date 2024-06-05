@@ -3,7 +3,7 @@ import { promises as fs } from 'fs';
 import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
 import { exec } from 'child_process';
 import {dirname} from 'path';
-import { getErrorMessage } from "./utils/getErrorMessage";
+import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
 import { spawnLikeExec } from "./utils/spawnLikeExec";
 
 
@@ -13,6 +13,7 @@ export const fileIoNode:IFileIo = {
             const content = await fs.readFile(absolutePath, 'utf-8');
             return content;
         } catch(e) {
+            if( isFileErrorNotExists(e) ) return undefined;
             throw new Error(`Cannot read file ${absolutePath}. Error: ${getErrorMessage(e)}`);
         }
     },
@@ -33,7 +34,7 @@ export const fileIoNode:IFileIo = {
         try {
             const hasFile = await fileIoNode.has_file(destination);
             if( !forceOverwrite && hasFile ) return;
-            
+
             await fs.copyFile(source, destination);
         } catch(e) {
             throw new Error(`Cannot copy file ${source} to ${destination}. Error: ${getErrorMessage(e)}`);

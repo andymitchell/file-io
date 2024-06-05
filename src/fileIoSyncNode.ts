@@ -4,7 +4,7 @@ import {  readFileSync, writeFileSync, appendFileSync, copyFileSync, readdirSync
 import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
 import { execSync } from 'child_process';
 import {dirname} from 'path';
-import { getErrorMessage } from "./utils/getErrorMessage";
+import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
 
 
 export const fileIoSyncNode:IFileIoSync = {
@@ -13,6 +13,8 @@ export const fileIoSyncNode:IFileIoSync = {
             const content = readFileSync(absolutePath, 'utf-8');
             return content;
         } catch(e) {
+            if( isFileErrorNotExists(e) ) return undefined;
+            
             throw new Error(`Cannot read file ${absolutePath}. Error: ${getErrorMessage(e)}`);
         }
     },

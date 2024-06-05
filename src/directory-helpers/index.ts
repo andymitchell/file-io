@@ -1,3 +1,4 @@
+import { readJsonFromFile, readJsonFromFileSync } from "./readJsonFromFile";
 import { getInvocationDirectory, getInvocationDirectorySync } from "./getInvocationDirectory";
 import { getInvokedScriptDirectory, getInvokedScriptDirectorySync } from "./getInvokedScriptDirectory";
 import { getPackageDirectory, getPackageDirectorySync } from "./getPackageDirectory";
@@ -11,6 +12,8 @@ export {
     getInvokedScriptDirectorySync,
     getPackageDirectory,
     getPackageDirectorySync,
+    readJsonFromFileSync,
+    readJsonFromFile,
     listSubDirectories,
     stripTrailingSlash
 }

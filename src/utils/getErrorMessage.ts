@@ -11,3 +11,7 @@ export function getErrorMessage(e:unknown) {
 
     return 'na';
 }
+
+export function isFileErrorNotExists(e:unknown):boolean {
+    return typeof e==='object' && !!e && "code" in e && e.code==='ENOENT';
+}
