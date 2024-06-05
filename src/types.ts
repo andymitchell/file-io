@@ -11,7 +11,7 @@ type Asyncify<T> = {
 export interface IFileIoSync {
     read: (absolutePath: string) => string | undefined;
     write: (absolutePath: string, content: string, append?: boolean, appendingSeparatorOnlyIfFileExists?: string) => void;
-    copy_file: (absolutePathSource: string, absolutePathDestination: string) => void;
+    copy_file: (absolutePathSource: string, absolutePathDestination: string, forceOverwrite?:boolean) => void;
     list_files: (absolutePathDirectory: string, options?: ListFileOptions) => ListedFile[];
     make_directory(absolutePathDirectory: string): void;
     remove_directory(absolutePathToDirectory: string, force?: boolean): void;

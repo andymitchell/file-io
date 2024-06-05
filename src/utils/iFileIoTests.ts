@@ -71,6 +71,34 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
         expect(result).toBe(content);
     });
 
+
+    test('copies a file - no overwrite by default', async () => {
+        const sourcePath = path.join(TMP_DIR, 'source.txt');
+        const destPath = path.join(TMP_DIR, 'dest.txt');
+        const content = 'Hello, world!';
+        const oldContent = 'Farewell friends';
+        writeFileSync(sourcePath, content);
+        writeFileSync(destPath, oldContent);
+
+        await fileIo.copy_file(sourcePath, destPath);
+
+        const result = await fileIo.read(destPath);
+        expect(result).toBe(oldContent);
+    });
+
+    test('copies a file - overwriting even if exists', async () => {
+        const sourcePath = path.join(TMP_DIR, 'source.txt');
+        const destPath = path.join(TMP_DIR, 'dest.txt');
+        const content = 'Hello, world!';
+        writeFileSync(sourcePath, content);
+        writeFileSync(destPath, 'Farewell friends');
+
+        await fileIo.copy_file(sourcePath, destPath, true);
+
+        const result = await fileIo.read(destPath);
+        expect(result).toBe(content);
+    });
+
     test('lists files in a directory', async () => {
         const filePath1 = path.join(TMP_DIR, 'test1.txt');
         const filePath2 = path.join(TMP_DIR, 'test2.txt');

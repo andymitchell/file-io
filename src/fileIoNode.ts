@@ -29,8 +29,11 @@ export const fileIoNode:IFileIo = {
             throw new Error(`Cannot write file ${absolutePath}. Error: ${getErrorMessage(e)}`);
         }
     },
-    async copy_file(source, destination) {
+    async copy_file(source, destination, forceOverwrite) {
         try {
+            const hasFile = await fileIoNode.has_file(destination);
+            if( !forceOverwrite && hasFile ) return;
+            
             await fs.copyFile(source, destination);
         } catch(e) {
             throw new Error(`Cannot copy file ${source} to ${destination}. Error: ${getErrorMessage(e)}`);

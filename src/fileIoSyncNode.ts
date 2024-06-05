@@ -29,8 +29,11 @@ export const fileIoSyncNode:IFileIoSync = {
             throw new Error(`Cannot write file ${absolutePath}. Error: ${getErrorMessage(e)}`);
         }
     },
-    copy_file(source, destination) {
+    copy_file(source, destination, forceOverwrite) {
         try {
+            const hasFile = fileIoSyncNode.has_file(destination);
+            if( !forceOverwrite && hasFile ) return;
+
             copyFileSync(source, destination);
         } catch(e) {
             throw new Error(`Cannot copy file ${source} to ${destination}. Error: ${getErrorMessage(e)}`);
