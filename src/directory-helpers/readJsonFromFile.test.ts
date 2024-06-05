@@ -26,6 +26,13 @@ describe("readJsonFromFile", () => {
             expect(result.file_found).toBe(true);
             expect(!!result.error).toBe(true);
         })
+
+        test("readJsonFromFile - invalid json - default object", async () => {
+            const result = await genericReadJsonFromFile(`${TEST_ASSETS_DIR}/corrupted.json.txt`, {"bye": "world"});
+            expect(result.object).toEqual({"bye": "world"});
+            expect(result.file_found).toBe(true);
+            expect(!!result.error).toBe(true);
+        })
     }
 
     runTests('sync');
