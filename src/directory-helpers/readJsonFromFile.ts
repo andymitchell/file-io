@@ -3,24 +3,32 @@ import { IFileIo, IFileIoSync } from '../types';
 import { fileIoNode } from '../fileIoNode';
 import { fileIoSyncNode } from '../fileIoSyncNode';
 
-type ReadJson = {object:unknown, file_found:boolean, error?: Error};
-export function readJsonFromFileSync(fileUri: string, defaultObject?:Record<string, any>, fileIo?:IFileIoSync):ReadJson {
+type DefaultObject = Record<string, any>;
+
+function missingFileUriReadJson(fileUri:string | undefined, defaultObject?:DefaultObject) {
+    return {object: defaultObject ?? undefined, file_found: false, error: new Error(`Failed to read json from ${fileUri}. No file uri.`)};
+}
+
+type ReadJson = {object:Record<string, any> | undefined, file_found:boolean, error?: Error};
+export function readJsonFromFileSync(fileUri: string | undefined, defaultObject?:DefaultObject, fileIo?:IFileIoSync):ReadJson {
     if( !fileIo ) fileIo = fileIoSyncNode;
+    if( !fileUri ) return missingFileUriReadJson(fileUri, defaultObject);
 
     const json = fileIo.read(fileUri);
 
     return processJson(fileUri, json, defaultObject);
 }
 
-export async function readJsonFromFile(fileUri: string, defaultObject?:Record<string, any>, fileIo?:IFileIo):Promise<ReadJson> {
+export async function readJsonFromFile(fileUri: string | undefined, defaultObject?:DefaultObject, fileIo?:IFileIo):Promise<ReadJson> {
     if( !fileIo ) fileIo = fileIoNode;
+    if( !fileUri ) return missingFileUriReadJson(fileUri, defaultObject);
 
     const json = await fileIo.read(fileUri);
 
     return processJson(fileUri, json, defaultObject);
 }
 
-function processJson(fileUri: string, json:string | undefined, defaultObject?:Record<string, any>, ):ReadJson {
+function processJson(fileUri: string, json:string | undefined, defaultObject?:DefaultObject, ):ReadJson {
     if( typeof json==='string' ) {
         try {
             const object = JSON.parse(json);
@@ -36,7 +44,7 @@ function processJson(fileUri: string, json:string | undefined, defaultObject?:Re
         return {
             object: defaultObject ?? undefined, 
             file_found: false,
-            error: new Error(`Failed to read json from ${fileUri}.`)
+            error: new Error(`Failed to read json from ${fileUri}. Bad file uri.`)
         }
     }
 }

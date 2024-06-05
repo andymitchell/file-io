@@ -33,6 +33,13 @@ describe("readJsonFromFile", () => {
             expect(result.file_found).toBe(true);
             expect(!!result.error).toBe(true);
         })
+
+        test("readJsonFromFile - no file - default object", async () => {
+            const result = await genericReadJsonFromFile(undefined, {"bye": "world"});
+            expect(result.object).toEqual({"bye": "world"});
+            expect(result.file_found).toBe(false);
+            expect(!!result.error).toBe(true);
+        })
     }
 
     runTests('sync');
