@@ -2,7 +2,7 @@
 type QuestionChoiceBasic = {
     type: 'choice',
     name: string,
-    meta?: any
+    meta?: unknown
 }
 
 export type QuestionChoice = QuestionChoiceBasic & {
@@ -31,9 +31,9 @@ type QuestionChainToStringArray = BaseQuestionChain & {
 };
 export type QuestionChain = QuestionChainToString | QuestionChainToStringArray;
 
-export type Answer = {type: 'single', answer: string, name?: string} | 
-{type: 'multi', answer: string[], name?: string} |
-{type: 'abort', answer: undefined, name?: string}
+export type Answer = {type: 'single', answer: string, name?: string, meta?: unknown} | 
+{type: 'multi', answer: string[], name?: string, meta?: unknown} |
+{type: 'abort', answer: undefined, name?: string, meta?: unknown}
 
 export interface IUserInput {
     ask(questionChain: QuestionChain): Promise<Answer>

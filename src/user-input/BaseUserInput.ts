@@ -28,7 +28,7 @@ export class BaseUserInput implements IUserInput {
             if( choice.next ) {
                 return this.ask(choice.next);
             } else {
-                return {type: 'single', answer: choice.name, name: question.name};
+                return {type: 'single', answer: choice.name, name: question.name, meta: choice.meta};
             }
         } else if( question.type==='input') {
             const result = await this.prompt(question);
@@ -36,7 +36,11 @@ export class BaseUserInput implements IUserInput {
             
         } else if ( question.type==='checkbox') {
             const answer = await this.promptMulti(question);
-            return {type: 'multi', answer, name: question.name};
+            const meta:any[] = [];
+            for( let i = 0; i < answer.length; i++ ) {
+                meta[i] = question.choices.find(x => x.name===answer[i])?.meta
+            }
+            return {type: 'multi', answer, name: question.name, meta};
         }
         return {type: 'abort', answer: undefined};
     
