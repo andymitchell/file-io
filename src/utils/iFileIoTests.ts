@@ -327,4 +327,29 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
         expect(result).toBe(`./a/b/c`);
     });
 
+    test('gets the file info', async () => {
+        const filePath = path.join(TMP_DIR, 'test.txt');
+        const result = await fileIo.file_info(filePath);
+        
+
+        expect(result.directory).toBe(TMP_DIR);
+        expect(result.extension).toBe('txt');
+        expect(result.dot_extension).toBe('.txt');
+        expect(result.base_name).toBe('test');
+        expect(result.file).toBe('test.txt');
+        expect(result.uri).toBe(filePath);
+    });
+
+    test('gets the file info - just the name', async () => {
+        const result = await fileIo.file_info('test.txt');
+        
+
+
+        expect(result.directory).toBe('');
+        expect(result.extension).toBe('txt');
+        expect(result.base_name).toBe('test');
+        expect(result.file).toBe('test.txt');
+        expect(result.uri).toBe('test.txt');
+    });
+
 }

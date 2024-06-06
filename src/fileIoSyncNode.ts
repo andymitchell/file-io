@@ -3,6 +3,7 @@ import {  readFileSync, writeFileSync, appendFileSync, copyFileSync, readdirSync
 
 import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
 import { execSync } from 'child_process';
+import * as path from 'path';
 import {dirname, relative} from 'path';
 import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
 
@@ -141,11 +142,29 @@ export const fileIoSyncNode:IFileIoSync = {
             throw new Error(`Cannot execute file ${commandOrPathToFile}. Error: ${getErrorMessage(e)}`);
         }
     },
+    file_info(absolutePathToFile) {
+        let directory = stripTrailingSlash(path.dirname(absolutePathToFile));
+        if( directory==='.' ) directory = '';
+        const file = path.basename(absolutePathToFile); // (basename with extension)
+        const base_name = path.basename(absolutePathToFile, path.extname(absolutePathToFile)); // (filename without extension)
+        const dot_extension = path.extname(absolutePathToFile);
+        
+        
+        return {
+            base_name,
+            extension: dot_extension.replace(/^\./, ''),
+            dot_extension,
+            file,
+            directory: directory,
+            uri: `${directory? `${directory}/` : ''}${file}`
+        };
+    },
     directory_name(absolutePathToFileOrDirectory) {
         return dirname(absolutePathToFileOrDirectory);
     },
-    relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile, prefixCurrentDirectoryIndicator = true) {
-        return `${prefixCurrentDirectoryIndicator? './' : ''}${relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile)}`;
+    relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile) {
+        const relPath = relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile);
+        return `${relPath.indexOf('../')!==0? './' : ''}${relPath}`;
     },
 };
 

@@ -31,6 +31,7 @@ describe('backupFileSync', () => {
         writeFileSync(filePath, content);
 
         const backupUri = backupFileSync(filePath) ?? '';
+        debugger;
         expect(filePath!==backupUri).toBe(true);
         expect(fileIoSyncNode.directory_name(filePath)).toBe(fileIoSyncNode.directory_name(backupUri));
 

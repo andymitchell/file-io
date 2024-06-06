@@ -16,6 +16,7 @@ export interface IFileIoSync {
     make_directory(absolutePathDirectory: string): void;
     remove_directory(absolutePathToDirectory: string, force?: boolean): void;
     remove_file(absolutePathToFile: string): void;
+    file_info(absolutePathToFile:string):FileInfo;
     directory_name(absolutePathToFileOrDirectory: string): string;
     has_directory(absolutePathDirectory: string): boolean;
     has_file(absolutePathToFile: string): boolean;
@@ -26,7 +27,9 @@ export interface IFileIoSync {
      * @param fromAbsolutePathDirectoryOrFile 
      * @param toAbsolutePathDirectoryOrFile 
      */
-    relative(fromAbsolutePathDirectoryOrFile:string, toAbsolutePathDirectoryOrFile:string, prefixCurrentDirectoryIndicator?:boolean):string;
+    relative(fromAbsolutePathDirectoryOrFile:string, toAbsolutePathDirectoryOrFile:string):string;
 }
 
 export interface IFileIo extends Asyncify<IFileIoSync> {};
+
+export type FileInfo = {base_name:string, extension:string, dot_extension:string, file: string, directory:string, uri:string};

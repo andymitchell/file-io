@@ -2,6 +2,7 @@ import { IFileIo } from "./types";
 import { promises as fs } from 'fs';
 import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
 import { exec } from 'child_process';
+import * as path from 'path';
 import  {dirname, relative} from 'path';
 import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
 import { spawnLikeExec } from "./utils/spawnLikeExec";
@@ -153,11 +154,29 @@ export const fileIoNode:IFileIo = {
             throw new Error(`Error executing ${commandOrPathToFile}: ${getErrorMessage(e)}`);
         }
     },
+    async file_info(absolutePathToFile) {
+        let directory = stripTrailingSlash(path.dirname(absolutePathToFile));
+        if( directory==='.' ) directory = '';
+        const file = path.basename(absolutePathToFile); // (basename with extension)
+        const base_name = path.basename(absolutePathToFile, path.extname(absolutePathToFile)); // (filename without extension)
+        const dot_extension = path.extname(absolutePathToFile);
+        
+        
+        return {
+            base_name,
+            extension: dot_extension.replace(/^\./, ''),
+            dot_extension,
+            file,
+            directory: directory,
+            uri: `${directory? `${directory}/` : ''}${file}`
+        };
+    },
     async directory_name(absolutePathToFileOrDirectory) {
         return dirname(absolutePathToFileOrDirectory);
     },
-    async relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile, prefixCurrentDirectoryIndicator = true) {
-        return `${prefixCurrentDirectoryIndicator? './' : ''}${relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile)}`;
+    async relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile) {
+        const relPath = relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile);
+        return `${relPath.indexOf('../')!==0? './' : ''}${relPath}`;
     },
 };
 
