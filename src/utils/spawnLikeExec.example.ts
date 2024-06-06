@@ -19,7 +19,7 @@ async function main() {
     });
     */
 
-    const stdout = await fileIoNode.execute_file(uri, true);
+    const stdout = await fileIoNode.execute(uri, true);
     console.log("\n\nSUCCESS stdout:\n", stdout);
 
 }

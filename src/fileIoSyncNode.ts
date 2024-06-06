@@ -3,7 +3,7 @@ import {  readFileSync, writeFileSync, appendFileSync, copyFileSync, readdirSync
 
 import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
 import { execSync } from 'child_process';
-import {dirname} from 'path';
+import {dirname, relative} from 'path';
 import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
 
 function makeDirectoryIfNotExists(pathOrFile:string):void {
@@ -133,16 +133,19 @@ export const fileIoSyncNode:IFileIoSync = {
             throw new Error(`Cannot chmod file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);
         }
     },
-    execute_file(absolutePathToFile, interactive?: boolean) {
+    execute(commandOrPathToFile, interactive?: boolean) {
         try {
             if( interactive ) throw new Error("Interactive mode not supported in sync");
-            return execSync(absolutePathToFile).toString();
+            return execSync(commandOrPathToFile).toString();
         } catch (e) {
-            throw new Error(`Cannot execute file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);
+            throw new Error(`Cannot execute file ${commandOrPathToFile}. Error: ${getErrorMessage(e)}`);
         }
     },
     directory_name(absolutePathToFileOrDirectory) {
         return dirname(absolutePathToFileOrDirectory);
+    },
+    relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile, prefixCurrentDirectoryIndicator = true) {
+        return `${prefixCurrentDirectoryIndicator? './' : ''}${relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile)}`;
     },
 };
 

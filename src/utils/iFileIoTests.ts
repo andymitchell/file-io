@@ -321,4 +321,10 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
         expect(result).toBe(TMP_DIR);
     });
 
+    test('relative directories', async () => {
+        const result = await fileIo.relative(TMP_DIR, `${TMP_DIR}/a/b/c`);
+        
+        expect(result).toBe(`./a/b/c`);
+    });
+
 }

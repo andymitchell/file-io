@@ -2,7 +2,7 @@ import { IFileIo } from "./types";
 import { promises as fs } from 'fs';
 import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
 import { exec } from 'child_process';
-import {dirname} from 'path';
+import  {dirname, relative} from 'path';
 import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
 import { spawnLikeExec } from "./utils/spawnLikeExec";
 
@@ -138,10 +138,10 @@ export const fileIoNode:IFileIo = {
             throw new Error(`Cannot chmod file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);
         }
     },
-    async execute_file(absolutePathToFile, interactive?: boolean) {
+    async execute(commandOrPathToFile, interactive?: boolean) {
         try {
             return await new Promise((resolve, reject) => {
-                (interactive? spawnLikeExec : exec)(absolutePathToFile, (error, stdout) => {
+                (interactive? spawnLikeExec : exec)(commandOrPathToFile, (error, stdout) => {
                     if( error ) {
                         reject(new Error(`Code: ${error.code ?? 'na'}. Message: ${error.message}. Stderr: ${error.stderr ?? 'na'}`));
                     } else {
@@ -150,11 +150,14 @@ export const fileIoNode:IFileIo = {
                 });
             });
         } catch (e) {
-            throw new Error(`Error executing ${absolutePathToFile}: ${getErrorMessage(e)}`);
+            throw new Error(`Error executing ${commandOrPathToFile}: ${getErrorMessage(e)}`);
         }
     },
     async directory_name(absolutePathToFileOrDirectory) {
         return dirname(absolutePathToFileOrDirectory);
+    },
+    async relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile, prefixCurrentDirectoryIndicator = true) {
+        return `${prefixCurrentDirectoryIndicator? './' : ''}${relative(fromAbsolutePathDirectoryOrFile, toAbsolutePathDirectoryOrFile)}`;
     },
 };
 
