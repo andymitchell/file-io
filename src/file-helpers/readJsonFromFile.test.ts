@@ -48,13 +48,13 @@ describe("readJsonFromFile", () => {
 
         test("readJsonFromFile - fail with comments unless JSON5", async () => {
             // @ts-ignore
-            const result = await genericReadJsonFromFile(`${TEST_ASSETS_DIR}/jsonWithComments.jsonc`);
+            const result = await genericReadJsonFromFile(`${TEST_ASSETS_DIR}/jsonWithComments.jsonc`, undefined, {vanilla_json: true});
             expect(result.object).toBe(undefined);
             expect(result.file_found).toBe(true);
             expect(!!result.error).toBe(true);
 
             // @ts-ignore
-            const result1 = await genericReadJsonFromFile(`${TEST_ASSETS_DIR}/jsonWithComments.jsonc`, undefined, {'json5': true});
+            const result1 = await genericReadJsonFromFile(`${TEST_ASSETS_DIR}/jsonWithComments.jsonc`);
             expect(!!result1.object).toBe(true);
             expect(result1.file_found).toBe(true);
             expect(!!result1.error).toBe(false);

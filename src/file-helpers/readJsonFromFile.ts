@@ -5,8 +5,8 @@ import { fileIoSyncNode } from '../fileIoSyncNode';
 import * as JSON5 from 'json5'
 
 type DefaultObject = Record<string, any>;
-type OptionsSync = {file_io:IFileIoSync, json5:boolean};
-type OptionsAsync = {file_io:IFileIo, json5:boolean};
+type OptionsSync = {file_io?:IFileIoSync, vanilla_json?:boolean};
+type OptionsAsync = {file_io?:IFileIo, vanilla_json?:boolean};
 
 function missingFileUriReadJson(fileUri:string | undefined, defaultObject?:DefaultObject) {
     return {object: defaultObject ?? undefined, file_found: false, error: new Error(`Failed to read json from ${fileUri}. No file uri.`)};
@@ -22,7 +22,7 @@ export function readJsonFromFileSync(fileUri: string | undefined, defaultObject?
 
     const json = fileIo.read(fileUri);
 
-    return processJson(fileUri, json, defaultObject, options?.json5);
+    return processJson(fileUri, json, defaultObject, options?.vanilla_json);
 }
 
 export async function readJsonFromFile(fileUri: string | undefined, defaultObject?:undefined, options?:OptionsAsync):Promise<ReadJsonWithUndefined>;
@@ -33,13 +33,13 @@ export async function readJsonFromFile(fileUri: string | undefined, defaultObjec
 
     const json = await fileIo.read(fileUri);
 
-    return processJson(fileUri, json, defaultObject, options?.json5);
+    return processJson(fileUri, json, defaultObject, options?.vanilla_json);
 }
 
-function processJson(fileUri: string, json:string | undefined, defaultObject?:DefaultObject, useJson5?:boolean):ReadJsonWithUndefined {
+function processJson(fileUri: string, json:string | undefined, defaultObject?:DefaultObject, useVanillaJson?:boolean):ReadJsonWithUndefined {
     if( typeof json==='string' ) {
         try {
-            const jsoner = useJson5? JSON5 : JSON;
+            const jsoner = useVanillaJson? JSON : JSON5;
             const object = jsoner.parse(json);
             return {object, file_found: true};
         } catch(e) {
