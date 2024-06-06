@@ -2,7 +2,7 @@
 import { IFileIo } from "../../types";
 import { IUserInput, QuestionChoice } from "../types";
 
-export async function getDirectoryFromUser(userInput:IUserInput, fileSystem:IFileIo, currentDirectory:string, name: string, message:string, suggestedDirs:string[]) {
+export async function getDirectoryFromUser(userInput:IUserInput, fileSystem:IFileIo, currentDirectory:string, name: string, message:string, suggestedDirs:string[]):Promise<string | undefined> {
     const chosenDir = await userInput.ask({
         type: suggestedDirs.length? 'list' : 'input',
         name,
@@ -39,5 +39,8 @@ export async function getDirectoryFromUser(userInput:IUserInput, fileSystem:IFil
         ]
     });
 
-    return chosenDir;
+    if( chosenDir.type==='single' ) {
+        return chosenDir.answer;
+    }
+    return undefined;
 }
