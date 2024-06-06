@@ -31,10 +31,18 @@ export const fileIoSyncNode:IFileIoSync = {
             throw new Error(`Cannot write file ${absolutePath}. Error: ${getErrorMessage(e)}`);
         }
     },
-    copy_file(source, destination, forceOverwrite) {
+    copy_file(source, destination, options) {
         try {
             const hasFile = fileIoSyncNode.has_file(destination);
-            if( !forceOverwrite && hasFile ) return;
+            if( !options?.overwrite && hasFile ) return;
+
+            if( options?.make_directory ) {
+                const destinationDirectory = fileIoSyncNode.directory_name(destination);
+                const hasDestinationDirectory = fileIoSyncNode.has_directory(destinationDirectory);
+                if( !hasDestinationDirectory ) {
+                    fileIoSyncNode.make_directory(destinationDirectory)
+                }
+            }
 
             copyFileSync(source, destination);
         } catch(e) {

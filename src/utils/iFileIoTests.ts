@@ -101,8 +101,37 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
         writeFileSync(sourcePath, content);
         writeFileSync(destPath, 'Farewell friends');
 
-        await fileIo.copy_file(sourcePath, destPath, true);
+        await fileIo.copy_file(sourcePath, destPath, {overwrite:true});
 
+        const result = await fileIo.read(destPath);
+        expect(result).toBe(content);
+    });
+
+    test('copies a file - fails if no destination dir', async () => {
+        const sourcePath = path.join(TMP_DIR, 'source.txt');
+        const destPath = path.join(`${TMP_DIR}/subdir9385`, 'dest.txt');
+        const content = 'Hello, world!';
+        writeFileSync(sourcePath, content);
+
+        let error = false;
+        try {
+            await fileIo.copy_file(sourcePath, destPath);
+        } catch(e) {
+            error = true;
+        }
+
+        expect(error).toBe(true);
+    });
+
+    test('copies a file - mkdir if needed', async () => {
+        const sourcePath = path.join(TMP_DIR, 'source.txt');
+        const destPath = path.join(`${TMP_DIR}/subdir9385`, 'dest.txt');
+        const content = 'Hello, world!';
+        writeFileSync(sourcePath, content);
+
+
+        await fileIo.copy_file(sourcePath, destPath, {'make_directory': true});
+        
         const result = await fileIo.read(destPath);
         expect(result).toBe(content);
     });
