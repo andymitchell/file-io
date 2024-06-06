@@ -30,7 +30,7 @@ describe('backupFileSync', () => {
         const content = 'Hello, world!';
         writeFileSync(filePath, content);
 
-        const backupUri = backupFileSync(filePath);
+        const backupUri = backupFileSync(filePath) ?? '';
         expect(filePath!==backupUri).toBe(true);
         expect(fileIoSyncNode.directory_name(filePath)).toBe(fileIoSyncNode.directory_name(backupUri));
 
@@ -43,8 +43,8 @@ describe('backupFileSync', () => {
         const content = 'Hello, world!';
         writeFileSync(filePath, content);
 
-        const backupUri1 = backupFileSync(filePath);
-        const backupUri2 = backupFileSync(filePath);
+        const backupUri1 = backupFileSync(filePath) ?? '';
+        const backupUri2 = backupFileSync(filePath) ?? '';
         expect(backupUri1!==backupUri2).toBe(true);
         expect(fileIoSyncNode.directory_name(filePath)).toBe(fileIoSyncNode.directory_name(backupUri2));
 

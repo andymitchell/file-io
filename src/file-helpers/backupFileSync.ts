@@ -10,9 +10,10 @@ import { fileIoSyncNode } from "../fileIoSyncNode";
  * @example
  * Given /a/b/c.txt it'll generate /a/b/c.backup_20240101010.txt (or a higher number until it finds a unique name)
  */
-export function backupFileSync(absoluteFileUri:string, getBackupFile?: GetBackupName):string {
+export function backupFileSync(absoluteFileUri:string, getBackupFile?: GetBackupName):string | undefined {
+    if( !fileIoSyncNode.has_file(absoluteFileUri) ) return undefined;
+    
     if( !getBackupFile ) {
-        
         getBackupFile = getBackupFileDefault;
     }
 
