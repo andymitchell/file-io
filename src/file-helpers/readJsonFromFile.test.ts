@@ -1,4 +1,4 @@
-import { getPackageDirectoryForSelfInTesting } from "./getPackageDirectory"
+import { getPackageDirectoryForSelfInTesting } from "../directory-helpers/getPackageDirectory"
 import { readJsonFromFile, readJsonFromFileSync } from "./readJsonFromFile"
 
 const TEST_ASSETS_DIR = `${getPackageDirectoryForSelfInTesting()}/test-assets`

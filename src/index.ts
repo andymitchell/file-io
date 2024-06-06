@@ -14,4 +14,5 @@ export type {
 
 export * from './user-input';
 export * from './directory-helpers';
+export * from './file-helpers';
 
