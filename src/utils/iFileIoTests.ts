@@ -9,13 +9,14 @@ import { getPackageDirectoryForSelfInTesting } from '../directory-helpers/getPac
 
 export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
     
+    const TMP_DIR_ROOT = `${getPackageDirectoryForSelfInTesting()}/tmp_ifileio_tests`;
     let TMP_DIR:string;
     beforeAll(async () => {
-        TMP_DIR = `${getPackageDirectoryForSelfInTesting()}/tmp_ifileio_tests_${Math.round(Math.random()*10000)+''}`;
-        rmSync(TMP_DIR, { recursive: true, force: true });
+        TMP_DIR = `${TMP_DIR_ROOT}/${Math.round(Math.random()*1000000)+''}`;
+        rmSync(TMP_DIR_ROOT, { recursive: true, force: true });
     });
     afterAll(async () => {
-        rmSync(TMP_DIR, { recursive: true, force: true });
+        rmSync(TMP_DIR_ROOT, { recursive: true, force: true });
     });
 
     beforeEach(() => {
@@ -49,10 +50,70 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
         const filePath = path.join(TMP_DIR, 'test.txt');
         const content = 'Hello, world!';
 
-        await fileIo.write(filePath, content, false);
+        await fileIo.write(filePath, content);
 
         const result = await fileIo.read(filePath);
         expect(result).toBe(content);
+    });
+
+    test('writes to a file - non existent dir fails', async () => {
+        const filePath = path.join(`${TMP_DIR}/subdir09258`, 'test.txt');
+        const content = 'Hello, world!';
+
+        let error = false;
+        try {
+            await fileIo.write(filePath, content);
+        } catch(e) {
+            error = true;
+        }
+        expect(error).toBe(true);
+
+        //const result = await fileIo.read(filePath);
+        //expect(result).toBe(content);
+    });
+
+    test('writes to a file - no overwriting if exists', async () => {
+        const filePath = path.join(`${TMP_DIR}`, 'test_exists.txt');
+        const content = 'Hello, world!';
+        const nextContent = 'Farewell, world!';
+
+        await fileIo.write(filePath, content);
+        const result1 = await fileIo.read(filePath);
+        expect(result1).toBe(content);
+
+        
+        let error = false;
+        try {
+            await fileIo.write(filePath, nextContent);
+        } catch(e) {
+            error = true;
+        }
+        expect(error).toBe(true);
+
+        const result = await fileIo.read(filePath);
+        expect(result).toBe(content);
+    });
+
+    test('writes to a file - overwrite wins', async () => {
+        const filePath = path.join(`${TMP_DIR}`, 'test_exists.txt');
+        const content = 'Hello, world!';
+        const nextContent = 'Farewell, world!';
+
+        await fileIo.write(filePath, content);
+        const result1 = await fileIo.read(filePath);
+        expect(result1).toBe(content);
+
+        
+        let error = false;
+        try {
+            await fileIo.write(filePath, nextContent, {overwrite: true});
+        } catch(e) {
+            error = true;
+        }
+        expect(error).toBe(false);
+
+        const result = await fileIo.read(filePath);
+        expect(result).toBe(nextContent);
     });
 
     test('appends to a file', async () => {
@@ -60,12 +121,13 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
         const content1 = 'Hello,';
         const content2 = ' world!';
 
-        await fileIo.write(filePath, content1, false);
-        await fileIo.write(filePath, content2, true);
+        await fileIo.write(filePath, content1);
+        await fileIo.write(filePath, content2, {append: true});
 
         const result = await fileIo.read(filePath);
         expect(result).toBe(content1 + content2);
     });
+
 
     test('copies a file', async () => {
         const sourcePath = path.join(TMP_DIR, 'source.txt');
@@ -88,8 +150,14 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
         writeFileSync(sourcePath, content);
         writeFileSync(destPath, oldContent);
 
-        await fileIo.copy_file(sourcePath, destPath);
+        let error = false
+        try {
+            await fileIo.copy_file(sourcePath, destPath);
+        } catch(e) {
+            error = true;
+        }
 
+        expect(error).toBe(true);
         const result = await fileIo.read(destPath);
         expect(result).toBe(oldContent);
     });

@@ -6,6 +6,13 @@ import { execSync } from 'child_process';
 import {dirname} from 'path';
 import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
 
+function makeDirectoryIfNotExists(pathOrFile:string):void {
+    const destinationDirectory = fileIoSyncNode.directory_name(pathOrFile);
+    const hasDestinationDirectory = fileIoSyncNode.has_directory(destinationDirectory);
+    if( !hasDestinationDirectory ) {
+        fileIoSyncNode.make_directory(destinationDirectory)
+    }
+}
 
 export const fileIoSyncNode:IFileIoSync = {
     read(absolutePath) {
@@ -18,13 +25,15 @@ export const fileIoSyncNode:IFileIoSync = {
             throw new Error(`Cannot read file ${absolutePath}. Error: ${getErrorMessage(e)}`);
         }
     },
-    write(absolutePath, content, append, appendingSeparatorOnlyIfFileExists?: string) {
+    write(absolutePath, content, options?) {
         try {
-            if (append) {
-                const hasFile = fileIoSyncNode.has_file(absolutePath);
-                if (hasFile && appendingSeparatorOnlyIfFileExists) content = `${appendingSeparatorOnlyIfFileExists}${content}`;
+            if( options?.make_directory ) makeDirectoryIfNotExists(absolutePath);
+            const hasFile = fileIoSyncNode.has_file(absolutePath);
+            if (options?.append) {
+                if (hasFile && options?.appending_separator_only_if_file_exists) content = `${options?.appending_separator_only_if_file_exists}${content}`;
                 appendFileSync(absolutePath, content);
             } else {
+                if( !options?.overwrite && hasFile ) throw new Error('Cannot overwrite');
                 writeFileSync(absolutePath, content);
             }
         } catch(e) {
@@ -34,15 +43,9 @@ export const fileIoSyncNode:IFileIoSync = {
     copy_file(source, destination, options) {
         try {
             const hasFile = fileIoSyncNode.has_file(destination);
-            if( !options?.overwrite && hasFile ) return;
+            if( !options?.overwrite && hasFile ) throw new Error('Cannot overwrite');
 
-            if( options?.make_directory ) {
-                const destinationDirectory = fileIoSyncNode.directory_name(destination);
-                const hasDestinationDirectory = fileIoSyncNode.has_directory(destinationDirectory);
-                if( !hasDestinationDirectory ) {
-                    fileIoSyncNode.make_directory(destinationDirectory)
-                }
-            }
+            if( options?.make_directory ) makeDirectoryIfNotExists(destination);
 
             copyFileSync(source, destination);
         } catch(e) {

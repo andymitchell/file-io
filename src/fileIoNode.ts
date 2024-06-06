@@ -6,6 +6,13 @@ import {dirname} from 'path';
 import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
 import { spawnLikeExec } from "./utils/spawnLikeExec";
 
+async function makeDirectoryIfNotExists(pathOrFile:string):Promise<void> {
+    const destinationDirectory = await fileIoNode.directory_name(pathOrFile);
+    const hasDestinationDirectory = await fileIoNode.has_directory(destinationDirectory);
+    if( !hasDestinationDirectory ) {
+        await fileIoNode.make_directory(destinationDirectory)
+    }
+}
 
 export const fileIoNode:IFileIo = {
     async read(absolutePath) {
@@ -17,13 +24,17 @@ export const fileIoNode:IFileIo = {
             throw new Error(`Cannot read file ${absolutePath}. Error: ${getErrorMessage(e)}`);
         }
     },
-    async write(absolutePath, content, append, appendingSeparatorOnlyIfFileExists?:string) {
+    async write(absolutePath, content, options?) {
         try {
-            if (append) {
-                const hasFile = await fileIoNode.has_file(absolutePath);
-                if( hasFile && appendingSeparatorOnlyIfFileExists ) content = `${appendingSeparatorOnlyIfFileExists}${content}`
+            if( options?.make_directory ) makeDirectoryIfNotExists(absolutePath);
+
+            const hasFile = await fileIoNode.has_file(absolutePath);
+            if (options?.append) {
+                
+                if( hasFile && options?.appending_separator_only_if_file_exists ) content = `${options?.appending_separator_only_if_file_exists}${content}`
                 await fs.appendFile(absolutePath, content);
             } else {
+                if( !options?.overwrite && hasFile ) throw new Error('Cannot overwrite');
                 await fs.writeFile(absolutePath, content);
             }
         } catch(e) {
@@ -33,15 +44,9 @@ export const fileIoNode:IFileIo = {
     async copy_file(source, destination, options) {
         try {
             const hasFile = await fileIoNode.has_file(destination);
-            if( !options?.overwrite && hasFile ) return;
+            if( !options?.overwrite && hasFile ) throw new Error('Cannot overwrite');
 
-            if( options?.make_directory ) {
-                const destinationDirectory = await fileIoNode.directory_name(destination);
-                const hasDestinationDirectory = await fileIoNode.has_directory(destinationDirectory);
-                if( !hasDestinationDirectory ) {
-                    await fileIoNode.make_directory(destinationDirectory)
-                }
-            }
+            if( options?.make_directory ) await makeDirectoryIfNotExists(destination);
 
             await fs.copyFile(source, destination);
         } catch(e) {
@@ -92,11 +97,9 @@ export const fileIoNode:IFileIo = {
             if( force ) {
                 await fs.rm(absolutePathToDirectory, {recursive: true, force: true});
             } else {
-                debugger;
                 await fs.rmdir(absolutePathToDirectory);
             }
         } catch(e) {
-            debugger;
             throw new Error(`Cannot remove directory ${absolutePathToDirectory}. Error: ${getErrorMessage(e)}`);
         }
     },
