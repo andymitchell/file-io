@@ -2,8 +2,11 @@
 import { IFileIo, IFileIoSync } from '../types';
 import { fileIoNode } from '../fileIoNode';
 import { fileIoSyncNode } from '../fileIoSyncNode';
+import * as JSON5 from 'json5'
 
 type DefaultObject = Record<string, any>;
+type OptionsSync = {file_io:IFileIoSync, json5:boolean};
+type OptionsAsync = {file_io:IFileIo, json5:boolean};
 
 function missingFileUriReadJson(fileUri:string | undefined, defaultObject?:DefaultObject) {
     return {object: defaultObject ?? undefined, file_found: false, error: new Error(`Failed to read json from ${fileUri}. No file uri.`)};
@@ -11,32 +14,33 @@ function missingFileUriReadJson(fileUri:string | undefined, defaultObject?:Defau
 
 type ReadJson = {object:Record<string, any>, file_found:boolean, error?: Error};
 type ReadJsonWithUndefined = {object:Record<string, any> | undefined, file_found:boolean, error?: Error};
-export function readJsonFromFileSync(fileUri: string | undefined, defaultObject?:undefined, fileIo?:IFileIoSync):ReadJsonWithUndefined;
-export function readJsonFromFileSync(fileUri: string | undefined, defaultObject:DefaultObject, fileIo?:IFileIoSync):ReadJson;
-export function readJsonFromFileSync(fileUri: string | undefined, defaultObject?:DefaultObject, fileIo?:IFileIoSync):ReadJsonWithUndefined {
-    if( !fileIo ) fileIo = fileIoSyncNode;
+export function readJsonFromFileSync(fileUri: string | undefined, defaultObject?:undefined, options?:OptionsSync):ReadJsonWithUndefined;
+export function readJsonFromFileSync(fileUri: string | undefined, defaultObject:DefaultObject, options?:OptionsSync):ReadJson;
+export function readJsonFromFileSync(fileUri: string | undefined, defaultObject?:DefaultObject, options?:OptionsSync):ReadJsonWithUndefined {
+    const fileIo = options?.file_io ?? fileIoSyncNode;
     if( !fileUri ) return missingFileUriReadJson(fileUri, defaultObject);
 
     const json = fileIo.read(fileUri);
 
-    return processJson(fileUri, json, defaultObject);
+    return processJson(fileUri, json, defaultObject, options?.json5);
 }
 
-export async function readJsonFromFile(fileUri: string | undefined, defaultObject?:undefined, fileIo?:IFileIo):Promise<ReadJsonWithUndefined>;
-export async function readJsonFromFile(fileUri: string | undefined, defaultObject:DefaultObject, fileIo?:IFileIo):Promise<ReadJson>;
-export async function readJsonFromFile(fileUri: string | undefined, defaultObject?:DefaultObject, fileIo?:IFileIo):Promise<ReadJsonWithUndefined> {
-    if( !fileIo ) fileIo = fileIoNode;
+export async function readJsonFromFile(fileUri: string | undefined, defaultObject?:undefined, options?:OptionsAsync):Promise<ReadJsonWithUndefined>;
+export async function readJsonFromFile(fileUri: string | undefined, defaultObject:DefaultObject, options?:OptionsAsync):Promise<ReadJson>;
+export async function readJsonFromFile(fileUri: string | undefined, defaultObject?:DefaultObject, options?:OptionsAsync):Promise<ReadJsonWithUndefined> {
+    const fileIo = options?.file_io ?? fileIoNode;
     if( !fileUri ) return missingFileUriReadJson(fileUri, defaultObject);
 
     const json = await fileIo.read(fileUri);
 
-    return processJson(fileUri, json, defaultObject);
+    return processJson(fileUri, json, defaultObject, options?.json5);
 }
 
-function processJson(fileUri: string, json:string | undefined, defaultObject?:DefaultObject, ):ReadJsonWithUndefined {
+function processJson(fileUri: string, json:string | undefined, defaultObject?:DefaultObject, useJson5?:boolean):ReadJsonWithUndefined {
     if( typeof json==='string' ) {
         try {
-            const object = JSON.parse(json);
+            const jsoner = useJson5? JSON5 : JSON;
+            const object = jsoner.parse(json);
             return {object, file_found: true};
         } catch(e) {
             return {
