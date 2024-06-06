@@ -26,7 +26,7 @@ export const fileIoNode:IFileIo = {
     },
     async write(absolutePath, content, options?) {
         try {
-            if( options?.make_directory ) makeDirectoryIfNotExists(absolutePath);
+            
 
             const hasFile = await fileIoNode.has_file(absolutePath);
             if (options?.append) {
@@ -35,6 +35,7 @@ export const fileIoNode:IFileIo = {
                 await fs.appendFile(absolutePath, content);
             } else {
                 if( !options?.overwrite && hasFile ) throw new Error('Cannot overwrite');
+                if( !hasFile && options?.make_directory ) makeDirectoryIfNotExists(absolutePath);
                 await fs.writeFile(absolutePath, content);
             }
         } catch(e) {

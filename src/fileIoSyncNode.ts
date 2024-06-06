@@ -27,13 +27,14 @@ export const fileIoSyncNode:IFileIoSync = {
     },
     write(absolutePath, content, options?) {
         try {
-            if( options?.make_directory ) makeDirectoryIfNotExists(absolutePath);
+            
             const hasFile = fileIoSyncNode.has_file(absolutePath);
             if (options?.append) {
                 if (hasFile && options?.appending_separator_only_if_file_exists) content = `${options?.appending_separator_only_if_file_exists}${content}`;
                 appendFileSync(absolutePath, content);
             } else {
                 if( !options?.overwrite && hasFile ) throw new Error('Cannot overwrite');
+                if( !hasFile && options?.make_directory ) makeDirectoryIfNotExists(absolutePath);
                 writeFileSync(absolutePath, content);
             }
         } catch(e) {
