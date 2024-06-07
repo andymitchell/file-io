@@ -68,9 +68,9 @@ async function getPackageDirectoryInternal(startFromDirectory?: string, fileIo?:
     if( action==='recurse' ) {
         // Got to go to the next level
         const parentDirectory = await fileIo.directory_name(await fileIo.directory_name(foundPackageJsonUri!));
-        return getPackageDirectoryInternal(parentDirectory, fileIo, true);
+        return getPackageDirectoryInternal(parentDirectory, fileIo, true, options);
     } else if( action==='ok' ) {
-        return fileIo.directory_name(foundPackageJsonUri!);
+        return await fileIo.directory_name(foundPackageJsonUri!);
     }
     return '';
 }
@@ -99,7 +99,7 @@ function getPackageDirectoryInternalSync(startFromDirectory?: string, fileIo?:IF
     if( action==='recurse' ) {
         // Got to go to the next level
         const parentDirectory = fileIo.directory_name(fileIo.directory_name(foundPackageJsonUri!));
-        return getPackageDirectoryInternalSync(parentDirectory, fileIo, true);
+        return getPackageDirectoryInternalSync(parentDirectory, fileIo, true, options);
     } else if( action==='ok' ) {
         return fileIo.directory_name(foundPackageJsonUri!);
     }
