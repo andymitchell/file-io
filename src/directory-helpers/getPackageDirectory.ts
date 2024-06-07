@@ -4,6 +4,7 @@ import { fileIoSyncNode } from '../fileIoSyncNode';
 import { IFileIo, IFileIoSync } from '../types';
 import { getInvokedScriptDirectory, getInvokedScriptDirectorySync } from './getInvokedScriptDirectory';
 
+type Options = {testing?:{skip_fileio_package_check?: boolean, verbose?:boolean}};
 
 
 /**
@@ -17,8 +18,8 @@ import { getInvokedScriptDirectory, getInvokedScriptDirectorySync } from './getI
  * @param fileIo 
  * @returns 
  */
-export function getPackageDirectorySync(startFromDirectory?: string, fileIo?:IFileIoSync):string {
-    return getPackageDirectoryInternalSync(startFromDirectory, fileIo);
+export function getPackageDirectorySync(startFromDirectory?: string, fileIo?:IFileIoSync, options?: Options):string {
+    return getPackageDirectoryInternalSync(startFromDirectory, fileIo, undefined, options);
 }
 
 /**
@@ -32,21 +33,22 @@ export function getPackageDirectorySync(startFromDirectory?: string, fileIo?:IFi
  * @param fileIo 
  * @returns 
  */
-export async function getPackageDirectory(startFromDirectory?: string, fileIo?:IFileIo):Promise<string> {
-    return getPackageDirectoryInternal(startFromDirectory, fileIo);
+export async function getPackageDirectory(startFromDirectory?: string, fileIo?:IFileIo, options?: Options):Promise<string> {
+    return getPackageDirectoryInternal(startFromDirectory, fileIo, undefined, options);
 }
 
 export function getPackageDirectoryForSelfInTesting():string {
-    return getPackageDirectoryInternalSync(undefined, undefined, undefined, {testing_skip_package_check: true});
+    return getPackageDirectoryInternalSync(undefined, undefined, undefined, {testing:{'skip_fileio_package_check': true}});
 }
 
-type Options = {testing_skip_package_check?: boolean};
 
 async function getPackageDirectoryInternal(startFromDirectory?: string, fileIo?:IFileIo, recursing?:boolean, options?: Options):Promise<string> {
     if( !fileIo ) fileIo = fileIoNode;
+    if( options?.testing?.verbose ) dLog(`initialise`, {startFromDirectory, getInvokedScriptDirectory: await getInvokedScriptDirectory(), recursing});
     if( !startFromDirectory ) {
         startFromDirectory = await getInvokedScriptDirectory();
     }
+    
     
     let currentDirectory = startFromDirectory;
     let foundPackageJsonUri:string | undefined;
@@ -58,8 +60,10 @@ async function getPackageDirectoryInternal(startFromDirectory?: string, fileIo?:
         if( !directoryHasParent(currentDirectory) ) break;
     }
 
+
     const packageJson = foundPackageJsonUri? await fileIo.read(foundPackageJsonUri) : undefined;
     const action = processPackage(packageJson, recursing, options);
+    if( options?.testing?.verbose ) dLog(`foundPackageJsonUri: ${foundPackageJsonUri}. action: ${action}`);
     if( action==='recurse' ) {
         // Got to go to the next level
         const parentDirectory = await fileIo.directory_name(await fileIo.directory_name(foundPackageJsonUri!));
@@ -72,9 +76,11 @@ async function getPackageDirectoryInternal(startFromDirectory?: string, fileIo?:
 
 function getPackageDirectoryInternalSync(startFromDirectory?: string, fileIo?:IFileIoSync, recursing?:boolean, options?: Options):string {
     if( !fileIo ) fileIo = fileIoSyncNode;
+    if( options?.testing?.verbose ) dLog(`initialise`, {startFromDirectory, getInvokedScriptDirectory: getInvokedScriptDirectorySync(), recursing});
     if( !startFromDirectory ) {
         startFromDirectory = getInvokedScriptDirectorySync();
     }
+    
     
     let currentDirectory = startFromDirectory;
     let foundPackageJsonUri:string | undefined;
@@ -88,6 +94,7 @@ function getPackageDirectoryInternalSync(startFromDirectory?: string, fileIo?:IF
 
     const packageJson = foundPackageJsonUri? fileIo.read(foundPackageJsonUri) : undefined;
     const action = processPackage(packageJson, recursing, options);
+    if( options?.testing?.verbose ) dLog(`foundPackageJsonUri: ${foundPackageJsonUri}. action: ${action}`);
     if( action==='recurse' ) {
         // Got to go to the next level
         const parentDirectory = fileIo.directory_name(fileIo.directory_name(foundPackageJsonUri!));
@@ -109,7 +116,7 @@ function processPackage(packageJson?:string, recursing?: boolean, options?: Opti
         debugger;
     }
 
-    if( foundThisPackage && !options?.testing_skip_package_check ) {
+    if( foundThisPackage && !options?.testing?.skip_fileio_package_check ) {
         if( recursing ) {
             throw new Error("Should not recurse twice");
         }
@@ -122,4 +129,9 @@ function processPackage(packageJson?:string, recursing?: boolean, options?: Opti
 
 function directoryHasParent(directory:string):boolean {
     return !(directory==='/' || directory.length<=2 );
+}
+
+
+function dLog(message:string, meta?: any) {
+    console.log(`[getPackageDirectory debug] ${message}`, meta);
 }
