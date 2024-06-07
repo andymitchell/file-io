@@ -30,11 +30,11 @@ function runTests(getPackageDirectoryAny: typeof getPackageDirectory | typeof ge
 
 
         const result = await useGetPackageDirectoryAny(getPackageDirectoryAny)
-        expect(getLastDirectory(result.default)).toBe('pkg-root');
+        expect(getLastDirectory(result.default)).toBe('fake-this-pkg');
         expect(getLastDirectory(result.caller)).toBe('fake-this-pkg');
         expect(getLastDirectory(result.fileio)).toBe('file-io');
         expect(getLastDirectory(result.root)).toBe('pkg-root');
-        expect(getLastDirectory(result['root-any'])).toBe('file-io');
+        expect(getLastDirectory(result['root-rootiest'])).toBe('file-io');
         expect(getLastDirectory(result['root-caller-or-caller-consumer'])).toBe('pkg-root');
 
         

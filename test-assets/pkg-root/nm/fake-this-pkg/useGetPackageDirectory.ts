@@ -8,7 +8,7 @@ export async function useGetPackageDirectoryAny(getPackageDirectoryAny: typeof g
         'caller': await getPackageDirectoryAny({target:'caller'}),
         'root': await getPackageDirectoryAny({target:'root'}),
         'root-caller-or-caller-consumer': await getPackageDirectoryAny({target:'root', strategy: 'caller-or-caller-consumer'}),
-        'root-any': await getPackageDirectoryAny({target:'root', strategy: 'any'}),
+        'root-rootiest': await getPackageDirectoryAny({target:'root', strategy: 'rootiest'}),
         'fileio': await getPackageDirectoryAny({target:'fileio'})
     }
 }

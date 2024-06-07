@@ -11,14 +11,14 @@ import { readJsonFromFile, readJsonFromFileSync } from '../file-helpers';
 
 type Options = {testing?:{skip_fileio_package_check?: boolean, verbose?:boolean}};
 type Package = {package_uri:string, package_directory:string, package_object:Record<string, any>};
-type Target = {target: 'root', strategy?: 'caller-or-caller-consumer' | 'any'} | {target: 'caller'} | {target: 'closest-directory', dir:string} | {target:'fileio'};
+type Target = {target: 'caller'} | {target: 'root', strategy?: 'caller-or-caller-consumer' | 'rootiest'} | {target: 'closest-directory', dir:string} | {target:'fileio'};
 
 /**
  * Find the directory with a package.json, depending on a target.
  * 
  * Targets
- * - 'root' [default]: If called from a project, return that project's package.json dir. Or if deployed in node_modules, return the consuming project's package.json dir.
- * - 'caller': The package.json dir of the project of the calling environment, ignoring whether it's deployed in node_modules or standalone.
+ * - 'caller' [default]: The package.json dir of the project of the calling environment.
+ * - 'root': If called from a project, return that project's package.json dir. Or if deployed in node_modules, return the consuming project's package.json dir.
  * - 'closest-directory': Given a directory, it goes up the tree until it finds package.json. 
  * - 'fileio': This package's package.json. Unlikely to be used, but useful in testing. 
  * 
@@ -40,8 +40,8 @@ export function getPackageDirectorySync(target?:Target, fileIo?:IFileIoSync, ver
  * Find the directory with a package.json, depending on a target.
  * 
  * Targets
- * - 'root' [default]: If called from a project, return that project's package.json dir. Or if deployed in node_modules, return the consuming project's package.json dir.
- * - 'caller': The package.json dir of the project of the calling environment, ignoring whether it's deployed in node_modules or standalone.
+ * - 'caller' [default]: The package.json dir of the project of the calling environment.
+ * - 'root': If called from a project, return that project's package.json dir. Or if deployed in node_modules, return the consuming project's package.json dir.
  * - 'closest-directory': Given a directory, it goes up the tree until it finds package.json. 
  * - 'fileio': This package's package.json. Unlikely to be used, but useful in testing. 
  * 
@@ -109,7 +109,7 @@ async function listPackagesUpwardsAsync(fileIo:IFileIo, startFromDirectory:strin
 }
 
 function targetDefaults(target?:Target):Target {
-    if( !target ) target = {target: 'root'};
+    if( !target ) target = {target: 'caller'};
     if( target.target==='root' && !target.strategy ) target.strategy = 'caller-or-caller-consumer';
     return target;
 }
