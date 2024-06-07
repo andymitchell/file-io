@@ -1,4 +1,5 @@
 
+import { dLog, dLogWarn } from '@andyrmitchell/utils';
 import { fileIoNode } from '../fileIoNode';
 import { fileIoSyncNode } from '../fileIoSyncNode';
 import { IFileIo, IFileIoSync } from '../types';
@@ -44,7 +45,7 @@ export function getPackageDirectoryForSelfInTesting():string {
 
 async function getPackageDirectoryInternal(startFromDirectory?: string, fileIo?:IFileIo, recursing?:boolean, options?: Options):Promise<string> {
     if( !fileIo ) fileIo = fileIoNode;
-    if( options?.testing?.verbose ) dLog(`initialise`, {startFromDirectory, getInvokedScriptDirectory: await getInvokedScriptDirectory(), recursing});
+    if( options?.testing?.verbose ) dLog('getPackageDirectory', `initialise`, {startFromDirectory, getInvokedScriptDirectory: await getInvokedScriptDirectory(), recursing});
     if( !startFromDirectory ) {
         startFromDirectory = await getInvokedScriptDirectory();
     }
@@ -63,7 +64,7 @@ async function getPackageDirectoryInternal(startFromDirectory?: string, fileIo?:
 
     const packageJson = foundPackageJsonUri? await fileIo.read(foundPackageJsonUri) : undefined;
     const action = processPackage(packageJson, recursing, options);
-    if( options?.testing?.verbose ) dLog(`foundPackageJsonUri: ${foundPackageJsonUri}. action: ${action}`);
+    if( options?.testing?.verbose ) dLog('getPackageDirectory', `foundPackageJsonUri: ${foundPackageJsonUri}. action: ${action}`);
     if( action==='recurse' ) {
         // Got to go to the next level
         const parentDirectory = await fileIo.directory_name(await fileIo.directory_name(foundPackageJsonUri!));
@@ -76,7 +77,7 @@ async function getPackageDirectoryInternal(startFromDirectory?: string, fileIo?:
 
 function getPackageDirectoryInternalSync(startFromDirectory?: string, fileIo?:IFileIoSync, recursing?:boolean, options?: Options):string {
     if( !fileIo ) fileIo = fileIoSyncNode;
-    if( options?.testing?.verbose ) dLog(`initialise`, {startFromDirectory, getInvokedScriptDirectory: getInvokedScriptDirectorySync(), recursing});
+    if( options?.testing?.verbose ) dLog('getPackageDirectory', `initialise`, {startFromDirectory, getInvokedScriptDirectory: getInvokedScriptDirectorySync(), recursing});
     if( !startFromDirectory ) {
         startFromDirectory = getInvokedScriptDirectorySync();
     }
@@ -94,7 +95,7 @@ function getPackageDirectoryInternalSync(startFromDirectory?: string, fileIo?:IF
 
     const packageJson = foundPackageJsonUri? fileIo.read(foundPackageJsonUri) : undefined;
     const action = processPackage(packageJson, recursing, options);
-    if( options?.testing?.verbose ) dLog(`foundPackageJsonUri: ${foundPackageJsonUri}. action: ${action}`);
+    if( options?.testing?.verbose ) dLog('getPackageDirectory', `foundPackageJsonUri: ${foundPackageJsonUri}. action: ${action}`);
     if( action==='recurse' ) {
         // Got to go to the next level
         const parentDirectory = fileIo.directory_name(fileIo.directory_name(foundPackageJsonUri!));
@@ -131,7 +132,3 @@ function directoryHasParent(directory:string):boolean {
     return !(directory==='/' || directory.length<=2 );
 }
 
-
-function dLog(message:string, meta?: any) {
-    console.log(`[getPackageDirectory debug] ${message}`, meta);
-}

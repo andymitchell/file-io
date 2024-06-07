@@ -6,6 +6,9 @@ import { getPackageDirectory, getPackageDirectoryForSelfInTesting, getPackageDir
 describe('getPackageDirectory', () => {
     runTests(getPackageDirectory);
     
+    test('col', () => {
+        getPackageDirectorySync(undefined, undefined, {testing: {verbose: true}});
+    })
     
 })
 
