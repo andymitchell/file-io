@@ -67,7 +67,7 @@ function pickStartingDirectorySync(target:Target, verbose?: boolean):string {
     } else if( target.target==='closest-directory' ) {
         return target.dir;
     } else {
-        const callingDirectory = getCallingScriptDirectorySync(/getPackageDirectory\.(j|t)s/);
+        const callingDirectory = getCallingScriptDirectorySync(/getPackageDirectory\.(j|t)s/, verbose);
         if( verbose ) dLog('getPackageDirectory:pickStartingDirectorySync', 'callingDirectory: '+callingDirectory);
         return callingDirectory
     }
@@ -95,7 +95,7 @@ async function pickStartingDirectoryAsync(target:Target, verbose?: boolean):Prom
     } else if( target.target==='closest-directory' ) {
         return target.dir;
     } else {
-        return await getCallingScriptDirectory(/getPackageDirectory\.(j|t)s/);
+        return await getCallingScriptDirectory(/getPackageDirectory\.(j|t)s/, verbose);
     }
 }
 

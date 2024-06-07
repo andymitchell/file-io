@@ -1,6 +1,7 @@
 import { stripTrailingSlash } from './stripTrailingSlash';
 import { fileURLToPath } from 'url';
 import * as path from 'path';
+import { dLog } from '@andyrmitchell/utils';
 
 /**
  * Returns the script directory of whoever calls this function. 
@@ -13,7 +14,7 @@ import * as path from 'path';
  * console.log(getCallingScriptDirectorySync()) // x/y
  * 
  */
-export function getCallingScriptDirectorySync(excludeAdditionalFilesInStack?:RegExp) {
+export function getCallingScriptDirectorySync(excludeAdditionalFilesInStack?:RegExp, verbose?: boolean) {
     
     
     let filename:string;
@@ -32,10 +33,15 @@ export function getCallingScriptDirectorySync(excludeAdditionalFilesInStack?:Reg
     
     }
 
+
+    if( verbose ) dLog('getCallingScriptDirectory', 'start', {filename, excludeAdditionalFilesInStack});
+
     const error = new Error();
     const stack = error.stack || '';
 
     const stackLines = stack.split('\n');
+
+    if( verbose ) dLog('getCallingScriptDirectory', 'stack lines', stackLines);
     
     // Find the line in the stack that does not include this file
     for (const line of stackLines) {
@@ -44,7 +50,9 @@ export function getCallingScriptDirectorySync(excludeAdditionalFilesInStack?:Reg
             if (match) {
                 const callingFile = match[1];
                 if( !callingFile ) throw new Error("Could not find calling file in stack trace");
-                return path.dirname(callingFile);
+                const callingFileFull = stripFileUriPrefix(path.dirname(callingFile));
+                if( verbose ) dLog('getCallingScriptDirectory', 'found callingFile: ', {callingFile, callingFileFull});
+                return path.dirname(callingFile).replace(/^file\:\/\/\//, '');
             }
         }
     }
@@ -52,6 +60,10 @@ export function getCallingScriptDirectorySync(excludeAdditionalFilesInStack?:Reg
     throw new Error('Could not determine calling script directory');
 }
 
-export async function getCallingScriptDirectory(excludeAdditionalFilesInStack?:RegExp) {
-    return getCallingScriptDirectorySync(excludeAdditionalFilesInStack);
+function stripFileUriPrefix(path:string):string {
+    return path.replace(/^file:\/+/, '');
+}
+
+export async function getCallingScriptDirectory(excludeAdditionalFilesInStack?:RegExp, verbose?:boolean) {
+    return getCallingScriptDirectorySync(excludeAdditionalFilesInStack, verbose);
 }
