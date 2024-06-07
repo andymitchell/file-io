@@ -1,42 +1,43 @@
 
-import { getPackageDirectory, getPackageDirectoryForSelfInTesting, getPackageDirectorySync } from "./getPackageDirectory"
 
+import { getPackageDirectory, getPackageDirectorySync } from '.';
+import {useGetPackageDirectoryAny} from '../../test-assets/pkg-root/nm/fake-this-pkg/useGetPackageDirectory';
 
 
 describe('getPackageDirectory', () => {
     runTests(getPackageDirectory);
     
-    test('col', () => {
-        getPackageDirectorySync(undefined, undefined, {testing: {verbose: true}});
-    })
-    
+
 })
 
 describe('getPackageDirectorySync', () => {
     runTests(getPackageDirectorySync);
     
     
+    
+    
 })
 
+function getLastDirectory(path:string):string {
+    const parts = path.split('/');
+    return parts[parts.length-1] ?? '';
+}
+
 function runTests(getPackageDirectoryAny: typeof getPackageDirectory | typeof getPackageDirectorySync) {
-    test('skips us because we are is_andyrmitchell_file_io_package', async () => {
-        const dir = await getPackageDirectoryAny();
-        expect(dir).toBe('');
-        
-    }, 1000*60)
 
-    test('finds us if forced', async () => {
-        const dir = await getPackageDirectoryForSelfInTesting();
-        const parts = dir.split('/');
-        expect(parts[parts.length-1]).toBe('file-io');
-        
-    }, 1000*60)
+    test('use a far away caller to check it is correct', async () => {
+        //const result1 = getPackageDirectorySync({target: 'root'});
 
-    test('skip fake-this-pkg because it is is_andyrmitchell_file_io_package', async () => {
-        const root = await getPackageDirectoryForSelfInTesting();
-        const dir = await getPackageDirectoryAny(`${root}/test-assets/pkg-root/node_modules/fake-this-pkg`);
-        const parts = dir.split('/');
-        expect(parts[parts.length-1]).toBe('pkg-root');
+
+        const result = await useGetPackageDirectoryAny(getPackageDirectoryAny)
+        expect(getLastDirectory(result.default)).toBe('pkg-root');
+        expect(getLastDirectory(result.caller)).toBe('fake-this-pkg');
+        expect(getLastDirectory(result.fileio)).toBe('file-io');
+        expect(getLastDirectory(result.root)).toBe('pkg-root');
+        expect(getLastDirectory(result['root-any'])).toBe('file-io');
+        expect(getLastDirectory(result['root-caller-or-caller-consumer'])).toBe('pkg-root');
+
         
-    }, 1000*60)
+    })
+
 }

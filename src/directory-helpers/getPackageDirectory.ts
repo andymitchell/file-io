@@ -1,132 +1,167 @@
 
-import { dLog, dLogWarn } from '@andyrmitchell/utils';
+
 import { fileIoNode } from '../fileIoNode';
 import { fileIoSyncNode } from '../fileIoSyncNode';
 import { IFileIo, IFileIoSync } from '../types';
 import { getInvokedScriptDirectory, getInvokedScriptDirectorySync } from './getInvokedScriptDirectory';
+import { getCallingScriptDirectory, getCallingScriptDirectorySync } from './getCallingScriptDirectory';
+import * as path from 'path';
+import { readJsonFromFile, readJsonFromFileSync } from '../file-helpers';
+
 
 type Options = {testing?:{skip_fileio_package_check?: boolean, verbose?:boolean}};
-
+type Package = {package_uri:string, package_directory:string, package_object:Record<string, any>};
+type Target = {target: 'root', strategy?: 'caller-or-caller-consumer' | 'any'} | {target: 'caller'} | {target: 'closest-directory', dir:string} | {target:'fileio'};
 
 /**
- * Find the nearest ancestor with package.json. Returns an absolute path. 
+ * Find the directory with a package.json, depending on a target.
  * 
- * The default startFromDirectory:
- *  - If your code is packaged and deployed in a consumer's node_modules: your package's root (i.e. node_modules/your-package)
- *  - If you're running your code directly (including a test environment), it'll be the root
+ * Targets
+ * - 'root' [default]: If called from a project, return that project's package.json dir. Or if deployed in node_modules, return the consuming project's package.json dir.
+ * - 'caller': The package.json dir of the project of the calling environment, ignoring whether it's deployed in node_modules or standalone.
+ * - 'closest-directory': Given a directory, it goes up the tree until it finds package.json. 
+ * - 'fileio': This package's package.json. Unlikely to be used, but useful in testing. 
  * 
- * @param startFromDirectory 
+ * @param target
  * @param fileIo 
+ * @param verbose 
  * @returns 
  */
-export function getPackageDirectorySync(startFromDirectory?: string, fileIo?:IFileIoSync, options?: Options):string {
-    return getPackageDirectoryInternalSync(startFromDirectory, fileIo, undefined, options);
+export function getPackageDirectorySync(target?:Target, fileIo?:IFileIoSync, verbose?:boolean):string {
+    if( !fileIo ) fileIo = fileIoSyncNode;
+    target = targetDefaults(target);
+    const startDirectory = pickStartingDirectorySync(target);
+    const packages = listPackagesUpwardsSync(fileIo, startDirectory);
+
+    return pickPackageDirectory(packages, target);
 }
 
 /**
- * Find the nearest ancestor with package.json. Returns an absolute path. 
+ * Find the directory with a package.json, depending on a target.
  * 
- * The default startFromDirectory:
- *  - If your code is packaged and deployed in a consumer's node_modules: your package's root (i.e. node_modules/your-package)
- *  - If you're running your code directly (including a test environment), it'll be the root
+ * Targets
+ * - 'root' [default]: If called from a project, return that project's package.json dir. Or if deployed in node_modules, return the consuming project's package.json dir.
+ * - 'caller': The package.json dir of the project of the calling environment, ignoring whether it's deployed in node_modules or standalone.
+ * - 'closest-directory': Given a directory, it goes up the tree until it finds package.json. 
+ * - 'fileio': This package's package.json. Unlikely to be used, but useful in testing. 
  * 
- * @param startFromDirectory 
+ * @param target 
  * @param fileIo 
+ * @param verbose 
  * @returns 
  */
-export async function getPackageDirectory(startFromDirectory?: string, fileIo?:IFileIo, options?: Options):Promise<string> {
-    return getPackageDirectoryInternal(startFromDirectory, fileIo, undefined, options);
+export async function getPackageDirectory(target?:Target, fileIo?:IFileIo, verbose?:boolean):Promise<string> {
+    if( !fileIo ) fileIo = fileIoNode;
+    target = targetDefaults(target);
+    const startDirectory = await pickStartingDirectoryAsync(target);
+    const packages = await listPackagesUpwardsAsync(fileIo, startDirectory);
+
+    return pickPackageDirectory(packages, target);
+}
+
+
+function pickStartingDirectorySync(target:Target):string {
+    if( target.target==='fileio' ) {
+        return getInvokedScriptDirectorySync();
+    } else if( target.target==='closest-directory' ) {
+        return target.dir;
+    } else {
+        return getCallingScriptDirectorySync(/getPackageDirectory\.(j|t)s/);
+    }
+}
+
+function listPackagesUpwardsSync(fileIo:IFileIoSync, startFromDirectory:string):Package[] {
+    let packageUris:string[] = [];
+    while(true) {
+        packageUris = [...packageUris, ...fileIo.list_files(startFromDirectory, {file_pattern: /^package\.json$/i}).map(x => x.uri)];
+        startFromDirectory = fileIo.directory_name(startFromDirectory);
+        if( !directoryHasParent(startFromDirectory) ) break;
+    }
+    return packageUris.map(package_uri => {
+        const package_object = readJsonFromFileSync(package_uri, {}).object;
+        const package_directory = fileIo.directory_name(package_uri);
+        return {package_uri, package_object, package_directory};
+    })
+}
+
+async function pickStartingDirectoryAsync(target:Target):Promise<string> {
+    if( target.target==='fileio' ) {
+        return await getInvokedScriptDirectory();
+    } else if( target.target==='closest-directory' ) {
+        return target.dir;
+    } else {
+        return await getCallingScriptDirectory(/getPackageDirectory\.(j|t)s/);
+    }
+}
+
+async function listPackagesUpwardsAsync(fileIo:IFileIo, startFromDirectory:string):Promise<Package[]> {
+    let packageUris:string[] = [];
+    while(true) {
+        packageUris = [...packageUris, ...(await fileIo.list_files(startFromDirectory, {file_pattern: /^package\.json$/i})).map(x => x.uri)];
+        startFromDirectory = await fileIo.directory_name(startFromDirectory);
+        if( !directoryHasParent(startFromDirectory) ) break;
+    }
+    return Promise.all(packageUris.map(async package_uri => {
+        const package_object = (await readJsonFromFile(package_uri, {})).object;
+        const package_directory = await fileIo.directory_name(package_uri);
+        return {package_uri, package_object, package_directory};
+    }))
+}
+
+function targetDefaults(target?:Target):Target {
+    if( !target ) target = {target: 'root'};
+    if( target.target==='root' && !target.strategy ) target.strategy = 'caller-or-caller-consumer';
+    return target;
+}
+function pickPackageDirectory(packages:Package[], target:Target):string {
+
+    let directory:string | undefined;
+    if( target.target==='fileio' ) {
+        // Take the first package, as they began at fileioDirectory
+        directory = packages[0]?.package_directory;
+    } else if( target.target==='closest-directory' ) {
+        // Take the first package, as they began at target.dir
+        directory = packages[0]?.package_directory;
+    } else {
+        // Package 0 is the caller's package.
+        if( target.target==='root' ) {
+            if( target.strategy==='caller-or-caller-consumer' ) {
+                // The risk is that if, for some reason, you have a package.json somewhere up the file system, it would naively consider that the root.
+                // But, for any project, node_modules is always flat, so the deepest a calling module will be is x/node_modules/y.
+                // So if y is saying give me the root, you can trust that the root will be within 1 directory hop. 
+                if( packages.length<=1 ) {
+                    directory = packages[0]?.package_directory;
+                } else {
+                    const difference = path.relative(packages[1]!.package_directory, packages[0]!.package_directory);
+                    if( difference.split('/').length<=2 ) {
+                        directory = packages[1]!.package_directory;
+                    } else {
+                        // The directory is too far away, don't trust it
+                        throw new Error("Cannot trust the found package root - it was too far from the caller.");
+                        //directory = packages[0]?.package_directory;
+                    }
+                }
+            } else {
+                // Get the last/most-up-the-tree
+                directory = packages[packages.length-1]?.package_directory;
+            }
+        } else if( target.target==='caller' ) {
+            directory = packages[0]?.package_directory;
+        }
+    }
+    if( !directory ) {
+        throw new Error("Could not pick package directory");
+    }
+    return directory;
+
+
 }
 
 export function getPackageDirectoryForSelfInTesting():string {
-    return getPackageDirectoryInternalSync(undefined, undefined, undefined, {testing:{'skip_fileio_package_check': true}});
+    return getPackageDirectorySync({target:'fileio'});
 }
 
 
-async function getPackageDirectoryInternal(startFromDirectory?: string, fileIo?:IFileIo, recursing?:boolean, options?: Options):Promise<string> {
-    if( !fileIo ) fileIo = fileIoNode;
-    if( options?.testing?.verbose ) dLog('getPackageDirectory', `initialise`, {startFromDirectory, getInvokedScriptDirectory: await getInvokedScriptDirectory(), recursing});
-    if( !startFromDirectory ) {
-        startFromDirectory = await getInvokedScriptDirectory();
-    }
-    
-    
-    let currentDirectory = startFromDirectory;
-    let foundPackageJsonUri:string | undefined;
-    while(true) {
-        const files = await fileIo.list_files(currentDirectory, {file_pattern: /^package\.json$/i});
-        foundPackageJsonUri = files[0]?.uri;
-        if( foundPackageJsonUri ) break;
-        currentDirectory =  await fileIo.directory_name(currentDirectory);
-        if( !directoryHasParent(currentDirectory) ) break;
-    }
-
-
-    const packageJson = foundPackageJsonUri? await fileIo.read(foundPackageJsonUri) : undefined;
-    const action = processPackage(packageJson, recursing, options);
-    if( options?.testing?.verbose ) dLog('getPackageDirectory', `foundPackageJsonUri: ${foundPackageJsonUri}. action: ${action}`);
-    if( action==='recurse' ) {
-        // Got to go to the next level
-        const parentDirectory = await fileIo.directory_name(await fileIo.directory_name(foundPackageJsonUri!));
-        return getPackageDirectoryInternal(parentDirectory, fileIo, true, options);
-    } else if( action==='ok' ) {
-        return await fileIo.directory_name(foundPackageJsonUri!);
-    }
-    return '';
-}
-
-function getPackageDirectoryInternalSync(startFromDirectory?: string, fileIo?:IFileIoSync, recursing?:boolean, options?: Options):string {
-    if( !fileIo ) fileIo = fileIoSyncNode;
-    if( options?.testing?.verbose ) dLog('getPackageDirectory', `initialise`, {startFromDirectory, getInvokedScriptDirectory: getInvokedScriptDirectorySync(), recursing});
-    if( !startFromDirectory ) {
-        startFromDirectory = getInvokedScriptDirectorySync();
-    }
-    
-    
-    let currentDirectory = startFromDirectory;
-    let foundPackageJsonUri:string | undefined;
-    while(true) {
-        const files = fileIo.list_files(currentDirectory, {file_pattern: /^package\.json$/i});
-        foundPackageJsonUri = files[0]?.uri;
-        if( foundPackageJsonUri ) break;
-        currentDirectory =  fileIo.directory_name(currentDirectory);
-        if( !directoryHasParent(currentDirectory) ) break;
-    }
-
-    const packageJson = foundPackageJsonUri? fileIo.read(foundPackageJsonUri) : undefined;
-    const action = processPackage(packageJson, recursing, options);
-    if( options?.testing?.verbose ) dLog('getPackageDirectory', `foundPackageJsonUri: ${foundPackageJsonUri}. action: ${action}`);
-    if( action==='recurse' ) {
-        // Got to go to the next level
-        const parentDirectory = fileIo.directory_name(fileIo.directory_name(foundPackageJsonUri!));
-        return getPackageDirectoryInternalSync(parentDirectory, fileIo, true, options);
-    } else if( action==='ok' ) {
-        return fileIo.directory_name(foundPackageJsonUri!);
-    }
-    return '';
-}
-
-function processPackage(packageJson?:string, recursing?: boolean, options?: Options) {
-    if( !packageJson ) return '';
-
-    let foundThisPackage = false;
-    try {
-        const pkg = JSON.parse(packageJson!);
-        foundThisPackage = pkg.is_andyrmitchell_file_io_package;
-    } catch(e) {
-        debugger;
-    }
-
-    if( foundThisPackage && !options?.testing?.skip_fileio_package_check ) {
-        if( recursing ) {
-            throw new Error("Should not recurse twice");
-        }
-        return 'recurse';
-    } else {
-        return 'ok'
-    }
-
-}
 
 function directoryHasParent(directory:string):boolean {
     return !(directory==='/' || directory.length<=2 );

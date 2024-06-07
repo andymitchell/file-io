@@ -1,7 +1,7 @@
 import { getPackageDirectoryForSelfInTesting } from "../directory-helpers/getPackageDirectory"
 import { readJsonFromFile, readJsonFromFileSync } from "./readJsonFromFile"
 
-const TEST_ASSETS_DIR = `${getPackageDirectoryForSelfInTesting()}/test-assets`
+const TEST_ASSETS_DIR = `${getPackageDirectoryForSelfInTesting()}/test-assets/json`
 describe("readJsonFromFile", () => {
 
     function runTests(type: 'sync' | 'async') {

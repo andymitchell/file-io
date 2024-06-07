@@ -12,6 +12,8 @@
         ]
     },
     "include": [
-        "./src"
+        "src/**/*",
+        "test-assets/outside-dir/*",
+        "test-assets/pkg-root/nm/fake-this-pkg/*"
     ]
 }
