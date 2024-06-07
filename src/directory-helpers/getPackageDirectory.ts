@@ -7,9 +7,9 @@ import { getInvokedScriptDirectory, getInvokedScriptDirectorySync } from './getI
 import { getCallingScriptDirectory, getCallingScriptDirectorySync } from './getCallingScriptDirectory';
 import * as path from 'path';
 import { readJsonFromFile, readJsonFromFileSync } from '../file-helpers';
+import { dLog } from '@andyrmitchell/utils';
 
 
-type Options = {testing?:{skip_fileio_package_check?: boolean, verbose?:boolean}};
 type Package = {package_uri:string, package_directory:string, package_object:Record<string, any>};
 type Target = {target: 'caller'} | {target: 'root', strategy?: 'caller-or-caller-consumer' | 'rootiest'} | {target: 'closest-directory', dir:string} | {target:'fileio'};
 
@@ -30,10 +30,11 @@ type Target = {target: 'caller'} | {target: 'root', strategy?: 'caller-or-caller
 export function getPackageDirectorySync(target?:Target, fileIo?:IFileIoSync, verbose?:boolean):string {
     if( !fileIo ) fileIo = fileIoSyncNode;
     target = targetDefaults(target);
-    const startDirectory = pickStartingDirectorySync(target);
-    const packages = listPackagesUpwardsSync(fileIo, startDirectory);
+    if( verbose ) dLog('getPackageDirectory', 'target', {target});
+    const startDirectory = pickStartingDirectorySync(target, verbose);
+    const packages = listPackagesUpwardsSync(fileIo, startDirectory, verbose);
 
-    return pickPackageDirectory(packages, target);
+    return pickPackageDirectory(packages, target, verbose);
 }
 
 /**
@@ -53,30 +54,34 @@ export function getPackageDirectorySync(target?:Target, fileIo?:IFileIoSync, ver
 export async function getPackageDirectory(target?:Target, fileIo?:IFileIo, verbose?:boolean):Promise<string> {
     if( !fileIo ) fileIo = fileIoNode;
     target = targetDefaults(target);
-    const startDirectory = await pickStartingDirectoryAsync(target);
-    const packages = await listPackagesUpwardsAsync(fileIo, startDirectory);
+    const startDirectory = await pickStartingDirectoryAsync(target, verbose);
+    const packages = await listPackagesUpwardsAsync(fileIo, startDirectory, verbose);
 
-    return pickPackageDirectory(packages, target);
+    return pickPackageDirectory(packages, target, verbose);
 }
 
 
-function pickStartingDirectorySync(target:Target):string {
+function pickStartingDirectorySync(target:Target, verbose?: boolean):string {
     if( target.target==='fileio' ) {
         return getInvokedScriptDirectorySync();
     } else if( target.target==='closest-directory' ) {
         return target.dir;
     } else {
-        return getCallingScriptDirectorySync(/getPackageDirectory\.(j|t)s/);
+        const callingDirectory = getCallingScriptDirectorySync(/getPackageDirectory\.(j|t)s/);
+        if( verbose ) dLog('getPackageDirectory:pickStartingDirectorySync', 'callingDirectory: '+callingDirectory);
+        return callingDirectory
     }
 }
 
-function listPackagesUpwardsSync(fileIo:IFileIoSync, startFromDirectory:string):Package[] {
+function listPackagesUpwardsSync(fileIo:IFileIoSync, startFromDirectory:string, verbose?: boolean):Package[] {
     let packageUris:string[] = [];
     while(true) {
+        if( verbose ) dLog('getPackageDirectory:listPackagesUpwardsSync', 'loop looking for package files', {startFromDirectory, packageUris: [...packageUris]});
         packageUris = [...packageUris, ...fileIo.list_files(startFromDirectory, {file_pattern: /^package\.json$/i}).map(x => x.uri)];
         startFromDirectory = fileIo.directory_name(startFromDirectory);
         if( !directoryHasParent(startFromDirectory) ) break;
     }
+    if( verbose ) dLog('getPackageDirectory:listPackagesUpwardsSync', 'found packages', {packageUris});
     return packageUris.map(package_uri => {
         const package_object = readJsonFromFileSync(package_uri, {}).object;
         const package_directory = fileIo.directory_name(package_uri);
@@ -84,7 +89,7 @@ function listPackagesUpwardsSync(fileIo:IFileIoSync, startFromDirectory:string):
     })
 }
 
-async function pickStartingDirectoryAsync(target:Target):Promise<string> {
+async function pickStartingDirectoryAsync(target:Target, verbose?: boolean):Promise<string> {
     if( target.target==='fileio' ) {
         return await getInvokedScriptDirectory();
     } else if( target.target==='closest-directory' ) {
@@ -94,7 +99,7 @@ async function pickStartingDirectoryAsync(target:Target):Promise<string> {
     }
 }
 
-async function listPackagesUpwardsAsync(fileIo:IFileIo, startFromDirectory:string):Promise<Package[]> {
+async function listPackagesUpwardsAsync(fileIo:IFileIo, startFromDirectory:string, verbose?: boolean):Promise<Package[]> {
     let packageUris:string[] = [];
     while(true) {
         packageUris = [...packageUris, ...(await fileIo.list_files(startFromDirectory, {file_pattern: /^package\.json$/i})).map(x => x.uri)];
@@ -113,7 +118,7 @@ function targetDefaults(target?:Target):Target {
     if( target.target==='root' && !target.strategy ) target.strategy = 'caller-or-caller-consumer';
     return target;
 }
-function pickPackageDirectory(packages:Package[], target:Target):string {
+function pickPackageDirectory(packages:Package[], target:Target, verbose?: boolean):string {
 
     let directory:string | undefined;
     if( target.target==='fileio' ) {
@@ -130,10 +135,14 @@ function pickPackageDirectory(packages:Package[], target:Target):string {
                 // But, for any project, node_modules is always flat, so the deepest a calling module will be is x/node_modules/y.
                 // So if y is saying give me the root, you can trust that the root will be within 1 directory hop. 
                 if( packages.length<=1 ) {
+                    if( verbose ) dLog('getPackageDirectory:pickPackageDirectory', 'root is package[0]', {target, packages});
                     directory = packages[0]?.package_directory;
                 } else {
                     const difference = path.relative(packages[1]!.package_directory, packages[0]!.package_directory);
-                    if( difference.split('/').length<=2 ) {
+                    const isClose = difference.split('/').length<=2;
+                    if( verbose ) dLog('getPackageDirectory:pickPackageDirectory', 'package difference', {target, packages, difference, isClose});
+                    if( isClose ) {
+                        if( verbose ) dLog('getPackageDirectory:pickPackageDirectory', 'root is package[1]', {target, packages});
                         directory = packages[1]!.package_directory;
                     } else {
                         // The directory is too far away, don't trust it
