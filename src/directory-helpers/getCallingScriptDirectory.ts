@@ -54,9 +54,9 @@ export function getCallingScriptDirectorySync(excludeAdditionalFunctionName?:str
             if (match && foundAdditionalFunctionName ) {
                 const callingFile = match[1];
                 if( !callingFile ) throw new Error("Could not find calling file in stack trace");
-                const callingFileFull = stripFileUriPrefix(path.dirname(callingFile));
-                if( verbose ) dLog('getCallingScriptDirectory', 'found callingFile: ', {callingFile, callingFileFull});
-                return path.dirname(callingFile).replace(/^file\:\/\/\//, '');
+                const callingDirectory = stripFileUriPrefix(path.dirname(callingFile))
+                if( verbose ) dLog('getCallingScriptDirectory', 'found callingFile: ', {callingFile, callingDirectory});
+                return callingDirectory;
             }
 
             if( !foundAdditionalFunctionName && excludeAdditionalFunctionName && line.includes(functionSignatureInStackTrace(excludeAdditionalFunctionName)) ) foundAdditionalFunctionName = true;
