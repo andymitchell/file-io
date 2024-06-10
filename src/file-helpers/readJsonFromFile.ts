@@ -43,10 +43,11 @@ function processJson(fileUri: string, json:string | undefined, defaultObject?:De
             const object = jsoner.parse(json);
             return {object, file_found: true};
         } catch(e) {
+            const message = e instanceof Error? e.message : 'na';
             return {
                 object: defaultObject ?? undefined,
                 file_found: true,
-                error: new Error(`Failed to read json from ${fileUri}. Could not parse JSON: ${json}`)
+                error: new Error(`Failed to read json from ${fileUri}. Could not parse JSON because: ${message}. JSON: ${json}`)
             };
         }
     } else {
