@@ -15,7 +15,6 @@ describe('getPackageDirectorySync', () => {
     
     
     
-    
 })
 
 function getLastDirectory(path:string):string {

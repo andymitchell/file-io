@@ -14,7 +14,7 @@ import { dLog } from '@andyrmitchell/utils';
  * console.log(getCallingScriptDirectorySync()) // x/y
  * 
  */
-export function getCallingScriptDirectorySync(excludeAdditionalFilesInStack?:RegExp, verbose?: boolean) {
+export function getCallingScriptDirectorySync(excludeAdditionalFunctionName?:string, verbose?: boolean) {
     
     
     let filename:string;
@@ -34,7 +34,8 @@ export function getCallingScriptDirectorySync(excludeAdditionalFilesInStack?:Reg
     }
 
 
-    if( verbose ) dLog('getCallingScriptDirectory', 'start', {filename, excludeAdditionalFilesInStack});
+    const thisFunctionName = getCallingScriptDirectorySync.name;
+    if( verbose ) dLog('getCallingScriptDirectory', 'start', {filename, thisFunctionName, excludeAdditionalFunctionName});
 
     const error = new Error();
     const stack = error.stack || '';
@@ -42,28 +43,37 @@ export function getCallingScriptDirectorySync(excludeAdditionalFilesInStack?:Reg
     const stackLines = stack.split('\n');
 
     if( verbose ) dLog('getCallingScriptDirectory', 'stack lines', stackLines);
+
+    
     
     // Find the line in the stack that does not include this file
+    let foundAdditionalFunctionName = excludeAdditionalFunctionName? false : true;
     for (const line of stackLines) {
-        if (!line.includes(filename) && !/getCallingScriptDirectory\.(j|t)s/.test(line) && (!excludeAdditionalFilesInStack || !excludeAdditionalFilesInStack.test(line))) {
+        if (!line.includes(functionSignatureInStackTrace(thisFunctionName)) ) {
             const match = line.match(/\((.*?):\d+:\d+\)/);
-            if (match) {
+            if (match && foundAdditionalFunctionName ) {
                 const callingFile = match[1];
                 if( !callingFile ) throw new Error("Could not find calling file in stack trace");
                 const callingFileFull = stripFileUriPrefix(path.dirname(callingFile));
                 if( verbose ) dLog('getCallingScriptDirectory', 'found callingFile: ', {callingFile, callingFileFull});
                 return path.dirname(callingFile).replace(/^file\:\/\/\//, '');
             }
+
+            if( !foundAdditionalFunctionName && excludeAdditionalFunctionName && line.includes(functionSignatureInStackTrace(excludeAdditionalFunctionName)) ) foundAdditionalFunctionName = true;
         }
     }
 
     throw new Error('Could not determine calling script directory');
 }
 
-function stripFileUriPrefix(path:string):string {
-    return path.replace(/^file:\/+/, '');
+function functionSignatureInStackTrace(functionName:string):string {
+    return ` ${functionName} (`
 }
 
-export async function getCallingScriptDirectory(excludeAdditionalFilesInStack?:RegExp, verbose?:boolean) {
-    return getCallingScriptDirectorySync(excludeAdditionalFilesInStack, verbose);
+function stripFileUriPrefix(path:string):string {
+    return path.replace(/^file:\/\//, '');
+}
+
+export async function getCallingScriptDirectory(excludeAdditionalFunctionName?:string, verbose?:boolean) {
+    return getCallingScriptDirectorySync(excludeAdditionalFunctionName, verbose);
 }
