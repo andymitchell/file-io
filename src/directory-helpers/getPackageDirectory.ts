@@ -141,8 +141,9 @@ function pickPackageDirectory(packages:Package[], target:Target, verbose?: boole
                     const packageName = packages[0]?.package_object.name;
                     const partsInPackageName = typeof packageName==='string'? packageName.split('/').length : 0;
                     const difference = path.relative(packages[1]!.package_directory, packages[0]!.package_directory);
-                    const isClose = difference.split('/').length<=(partsInPackageName+1);
-                    if( verbose ) dLog('getPackageDirectory:pickPackageDirectory', 'package difference', {target, packages, difference, isClose});
+                    const comparison = {differenceParts: difference.split('/').length, allowedParts: (partsInPackageName+1)}
+                    const isClose = comparison.differenceParts<=comparison.allowedParts;
+                    if( verbose ) dLog('getPackageDirectory:pickPackageDirectory', 'package difference', {target, packages, packageName, partsInPackageName,comparison, difference, isClose});
                     if( isClose ) {
                         if( verbose ) dLog('getPackageDirectory:pickPackageDirectory', 'root is package[1]', {target, packages});
                         directory = packages[1]!.package_directory;
