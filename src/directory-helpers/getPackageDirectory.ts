@@ -10,7 +10,7 @@ import { readJsonFromFile, readJsonFromFileSync } from '../file-helpers';
 import { dLog } from '@andyrmitchell/utils';
 
 
-type Package = {package_uri:string, package_directory:string, package_object:Record<string, any>};
+type Package = {package_uri:string, package_directory:string, package_object:Record<string, any>, package_object_error?: string};
 type Target = {target: 'caller'} | {target: 'root', strategy?: 'caller-or-caller-consumer' | 'rootiest'} | {target: 'closest-directory', dir:string} | {target:'fileio'};
 
 /**
@@ -83,9 +83,10 @@ function listPackagesUpwardsSync(fileIo:IFileIoSync, startFromDirectory:string, 
     }
     if( verbose ) dLog('getPackageDirectory:listPackagesUpwardsSync', 'found packages', {packageUris});
     return packageUris.map(package_uri => {
-        const package_object = readJsonFromFileSync(package_uri, {}).object;
+        const result = readJsonFromFileSync(package_uri, {});
+        const package_object = result.object;
         const package_directory = fileIo.directory_name(package_uri);
-        return {package_uri, package_object, package_directory};
+        return {package_uri, package_object, package_directory, package_object_error: result.error?.message};
     })
 }
 
@@ -107,9 +108,10 @@ async function listPackagesUpwardsAsync(fileIo:IFileIo, startFromDirectory:strin
         if( !directoryHasParent(startFromDirectory) ) break;
     }
     return Promise.all(packageUris.map(async package_uri => {
-        const package_object = (await readJsonFromFile(package_uri, {})).object;
+        const result = await readJsonFromFile(package_uri, {});
+        const package_object = result.object;
         const package_directory = await fileIo.directory_name(package_uri);
-        return {package_uri, package_object, package_directory};
+        return {package_uri, package_object, package_directory, package_object_error: result.error?.message};
     }))
 }
 
@@ -139,7 +141,7 @@ function pickPackageDirectory(packages:Package[], target:Target, verbose?: boole
                     directory = packages[0]?.package_directory;
                 } else {
                     const packageName = packages[0]?.package_object.name;
-                    const partsInPackageName = typeof packageName==='string'? packageName.split('/').length : 0;
+                    const partsInPackageName = packageName && typeof packageName==='string'? packageName.split('/').length : 2; // Default to 2, as the most generous setting if it fails (allowing @auth/subpackage)
                     const difference = path.relative(packages[1]!.package_directory, packages[0]!.package_directory);
                     const comparison = {differenceParts: difference.split('/').length, allowedParts: (partsInPackageName+1)}
                     const isClose = comparison.differenceParts<=comparison.allowedParts;
