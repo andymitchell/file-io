@@ -2,7 +2,7 @@
 import { IFileIo, IFileIoSync } from '../types';
 import { fileIoNode } from '../fileIoNode';
 import { fileIoSyncNode } from '../fileIoSyncNode';
-import * as JSON5 from 'json5'
+import JSON5 from 'json5';
 
 type DefaultObject = Record<string, any>;
 type OptionsSync = {file_io?:IFileIoSync, vanilla_json?:boolean};
