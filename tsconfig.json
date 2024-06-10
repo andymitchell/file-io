@@ -14,6 +14,6 @@
     "include": [
         "src/**/*",
         "test-assets/outside-dir/*",
-        "test-assets/pkg-root/nm/fake-this-pkg/*"
+        "test-assets/pkg-root/nm/@author/fake-this-pkg/*"
     ]
 }

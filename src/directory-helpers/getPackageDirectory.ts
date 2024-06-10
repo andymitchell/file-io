@@ -138,8 +138,10 @@ function pickPackageDirectory(packages:Package[], target:Target, verbose?: boole
                     if( verbose ) dLog('getPackageDirectory:pickPackageDirectory', 'root is package[0]', {target, packages});
                     directory = packages[0]?.package_directory;
                 } else {
+                    const packageName = packages[0]?.package_object.name;
+                    const partsInPackageName = typeof packageName==='string'? packageName.split('/').length : 0;
                     const difference = path.relative(packages[1]!.package_directory, packages[0]!.package_directory);
-                    const isClose = difference.split('/').length<=2;
+                    const isClose = difference.split('/').length<=(partsInPackageName+1);
                     if( verbose ) dLog('getPackageDirectory:pickPackageDirectory', 'package difference', {target, packages, difference, isClose});
                     if( isClose ) {
                         if( verbose ) dLog('getPackageDirectory:pickPackageDirectory', 'root is package[1]', {target, packages});
