@@ -1,3 +1,5 @@
+import { ExecSyncOptionsWithStringEncoding } from "child_process";
+
 export type ListFileOptions = { recurse?: boolean, file_pattern?: RegExp };
 type ListedFile = { file: string, path: string, uri: string };
 
@@ -21,7 +23,7 @@ export interface IFileIoSync {
     has_directory(absolutePathDirectory: string): boolean;
     has_file(absolutePathToFile: string): boolean;
     chmod_file(absolutePathToFile: string, permissions: string): void;
-    execute(commandOrPathToFile: string, interactive?:boolean): string
+    execute(commandOrPathToFile: string, interactive?:boolean, options?: ExecSyncOptionsWithStringEncoding): string
     /**
      * Returns the relative path from fromAbsolutePathDirectoryOrFile to toAbsolutePathDirectoryOrFile
      * @param fromAbsolutePathDirectoryOrFile 
