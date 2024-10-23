@@ -2,7 +2,7 @@ import { IFileIoSync } from "./types";
 import {  readFileSync, writeFileSync, appendFileSync, copyFileSync, readdirSync, mkdirSync, rmdirSync, rmSync, statSync, chmodSync } from 'fs';
 
 import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
-import { execSync } from 'child_process';
+import { execSync, ExecSyncOptionsWithStringEncoding } from 'child_process';
 import * as path from 'path';
 import {dirname, relative} from 'path';
 import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
@@ -134,10 +134,10 @@ export const fileIoSyncNode:IFileIoSync = {
             throw new Error(`Cannot chmod file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);
         }
     },
-    execute(commandOrPathToFile, interactive?: boolean) {
+    execute(commandOrPathToFile, interactive?: boolean, options?: ExecSyncOptionsWithStringEncoding) {
         try {
             if( interactive ) throw new Error("Interactive mode not supported in sync");
-            return execSync(commandOrPathToFile).toString();
+            return execSync(commandOrPathToFile, options).toString();
         } catch (e) {
             throw new Error(`Cannot execute file ${commandOrPathToFile}. Error: ${getErrorMessage(e)}`);
         }

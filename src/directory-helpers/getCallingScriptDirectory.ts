@@ -75,5 +75,6 @@ function stripFileUriPrefix(path:string):string {
 }
 
 export async function getCallingScriptDirectory(excludeAdditionalFunctionName?:string, verbose?:boolean) {
+    // TODO This doesn't work when called from external package; because it returns this location (the caller of getCallingScriptDirectorySync)
     return getCallingScriptDirectorySync(excludeAdditionalFunctionName, verbose);
 }
