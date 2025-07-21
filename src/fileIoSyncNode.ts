@@ -6,6 +6,7 @@ import { execSync, type ExecSyncOptionsWithStringEncoding } from 'child_process'
 import * as path from 'path';
 import {dirname, relative} from 'path';
 import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage.js";
+import { listDirFiles } from "./file-helpers/list-files/listDirFiles.ts";
 
 function makeDirectoryIfNotExists(pathOrFile:string):void {
     const destinationDirectory = fileIoSyncNode.directory_name(pathOrFile);
@@ -55,24 +56,7 @@ export const fileIoSyncNode:IFileIoSync = {
         }
     },
     list_files(absolutePathDirectory, options?) {
-        try {
-            let files = readdirSync(absolutePathDirectory, { recursive: options?.recurse, withFileTypes: true });
-
-            return files
-                .filter(x => {
-                    return x.isFile() && (!options?.file_pattern || options?.file_pattern.test(x.name));
-                })
-                .map(x => {
-                    const path = stripTrailingSlash(x.parentPath);
-                    return {
-                        file: x.name,
-                        path,
-                        uri: `${path}/${x.name}`
-                    };
-                });
-        } catch(e) {
-            throw new Error(`Cannot list files ${absolutePathDirectory}. Error: ${getErrorMessage(e)}`);
-        }
+        return listDirFiles(absolutePathDirectory, options);
     },
     make_directory(absolutePathToDirectory) {
         try {

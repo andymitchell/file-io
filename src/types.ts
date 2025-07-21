@@ -1,7 +1,7 @@
 import type { ExecSyncOptionsWithStringEncoding } from "child_process";
+import type { ListedFile, ListFileOptions } from "./file-helpers/list-files/types.ts";
 
-export type ListFileOptions = { recurse?: boolean, file_pattern?: RegExp };
-type ListedFile = { file: string, path: string, uri: string };
+
 
 
 type Asyncify<T> = {

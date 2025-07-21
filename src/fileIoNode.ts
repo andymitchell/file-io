@@ -6,6 +6,7 @@ import * as path from 'path';
 import  {dirname, relative} from 'path';
 import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage.js";
 import { spawnLikeExec } from "./utils/spawnLikeExec.js";
+import { listDirFiles } from "./file-helpers/list-files/listDirFiles.ts";
 
 async function makeDirectoryIfNotExists(pathOrFile:string):Promise<void> {
     const destinationDirectory = await fileIoNode.directory_name(pathOrFile);
@@ -56,30 +57,7 @@ export const fileIoNode:IFileIo = {
         }
     },
     async list_files(absolutePathDirectory, options?) {
-        try {
-            
-
-            let files = await fs.readdir(absolutePathDirectory, {'recursive': options?.recurse, 'withFileTypes': true});
-
-            
-
-            const found = files
-                .filter(x => {
-                    return x.isFile() && (!options?.file_pattern || options?.file_pattern.test(x.name))
-                })
-                .map(x => {
-                    const path = stripTrailingSlash(x.parentPath);
-                    return {
-                        file: x.name, 
-                        path,
-                        uri: `${path}/${x.name}`
-                    }
-                });
-            
-            return found;
-        } catch(e) {
-            throw new Error(`Cannot list files ${absolutePathDirectory}. Error: ${getErrorMessage(e)}`);
-        }
+        return listDirFiles(absolutePathDirectory, options);
     },
     async make_directory(absolutePathToDirectory) {
         try {
