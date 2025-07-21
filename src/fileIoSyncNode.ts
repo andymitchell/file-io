@@ -1,11 +1,11 @@
-import { IFileIoSync } from "./types";
+import type { IFileIoSync } from "./types.js";
 import {  readFileSync, writeFileSync, appendFileSync, copyFileSync, readdirSync, mkdirSync, rmdirSync, rmSync, statSync, chmodSync } from 'fs';
 
-import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
-import { execSync, ExecSyncOptionsWithStringEncoding } from 'child_process';
+import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash.js";
+import { execSync, type ExecSyncOptionsWithStringEncoding } from 'child_process';
 import * as path from 'path';
 import {dirname, relative} from 'path';
-import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
+import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage.js";
 
 function makeDirectoryIfNotExists(pathOrFile:string):void {
     const destinationDirectory = fileIoSyncNode.directory_name(pathOrFile);
@@ -63,7 +63,7 @@ export const fileIoSyncNode:IFileIoSync = {
                     return x.isFile() && (!options?.file_pattern || options?.file_pattern.test(x.name));
                 })
                 .map(x => {
-                    const path = stripTrailingSlash(x.parentPath ?? x.path);
+                    const path = stripTrailingSlash(x.parentPath);
                     return {
                         file: x.name,
                         path,

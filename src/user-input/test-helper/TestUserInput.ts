@@ -1,4 +1,4 @@
-import { Answer, IUserInput, QuestionChain } from "../types";
+import type { Answer, IUserInput, QuestionChain } from "../types.js";
 
 export type TestQuestionAnswerMap = Record<string, Answer>;
 

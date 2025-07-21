@@ -1,7 +1,7 @@
 
 import inquirer from 'inquirer';
-import { IUserInput, QuestionChain } from './types';
-import { BaseUserInput } from './BaseUserInput';
+import type { IUserInput, QuestionChain } from './types.js';
+import { BaseUserInput } from './BaseUserInput.js';
 
 
 
@@ -17,15 +17,15 @@ export class UserInputNode extends BaseUserInput implements IUserInput {
         return response[question.name];
     }
 
-    protected async prompt(question:QuestionChain):Promise<string | undefined> {
+    protected override async prompt(question:QuestionChain):Promise<string | undefined> {
         return await this._prompt<string | undefined>(question);
     }
 
-    protected async promptMulti(question:QuestionChain):Promise<string[]> {
+    protected override async promptMulti(question:QuestionChain):Promise<string[]> {
         return await this._prompt<string[]>(question);
     }
 
-    protected async promptBoolean(question:QuestionChain):Promise<boolean> {
+    protected override async promptBoolean(question:QuestionChain):Promise<boolean> {
         return !!(await this._prompt<boolean | undefined>(question));
     }
 

@@ -1,4 +1,4 @@
-import { ExecException, exec, spawn } from "child_process";
+import { type ExecException, spawn } from "child_process";
 type SpawnLikeExecCallback = (error: ExecException | null, stdout: string, stderr: string) => void;
 
 /**

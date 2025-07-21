@@ -1,4 +1,4 @@
-import { ExecSyncOptionsWithStringEncoding } from "child_process";
+import type { ExecSyncOptionsWithStringEncoding } from "child_process";
 
 export type ListFileOptions = { recurse?: boolean, file_pattern?: RegExp };
 type ListedFile = { file: string, path: string, uri: string };

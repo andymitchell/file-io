@@ -1,6 +1,6 @@
-import { stripTrailingSlash } from "../directory-helpers";
-import { fileIoSyncNode } from "../fileIoSyncNode";
-import { FileInfo } from "../types";
+
+import { fileIoSyncNode } from "../fileIoSyncNode.js";
+import type { FileInfo } from "../types.js";
 
 
 /**

@@ -1,4 +1,4 @@
-import { Answer, IUserInput, QuestionChain,  QuestionChoice } from './types';
+import type { Answer, IUserInput, QuestionChain,  QuestionChoice } from './types.js';
 
 export class BaseUserInput implements IUserInput {
 

@@ -6,8 +6,8 @@ export default defineConfig({
   },
   publicDir: false,
   clean: true,
-  target: ['es2020'],
+  target: ['esnext'],
   minify: false,
   dts: true,
-  format: ['cjs', 'esm'], // When this changes, update 'type' in package.json 
+  format: ['esm'], 
 });

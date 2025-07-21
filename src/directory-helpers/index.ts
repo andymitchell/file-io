@@ -1,10 +1,10 @@
 
-import { getCallingScriptDirectory, getCallingScriptDirectorySync } from "./getCallingScriptDirectory";
-import { getInvocationDirectory, getInvocationDirectorySync } from "./getInvocationDirectory";
+import { getCallingScriptDirectory, getCallingScriptDirectorySync } from "./getCallingScriptDirectory.js";
+import { getInvocationDirectory, getInvocationDirectorySync } from "./getInvocationDirectory.js";
 //import { getInvokedScriptDirectory, getInvokedScriptDirectorySync } from "./getInvokedScriptDirectory";
-import { getPackageDirectory, getPackageDirectorySync } from "./getPackageDirectory";
-import { listSubDirectories } from "./listSubDirectories";
-import { stripTrailingSlash } from "./stripTrailingSlash";
+import { getPackageDirectory, getPackageDirectorySync } from "./getPackageDirectory.js";
+import { listSubDirectories } from "./listSubDirectories.js";
+import { stripTrailingSlash } from "./stripTrailingSlash.js";
 
 export {
     getInvocationDirectory,

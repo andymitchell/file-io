@@ -1,5 +1,5 @@
 import { cwd } from 'process';
-import { stripTrailingSlash } from './stripTrailingSlash';
+import { stripTrailingSlash } from './stripTrailingSlash.js';
 
 /**
  * E.g. if invoked as "node ./dist/main.js", this will return "<path to .>"

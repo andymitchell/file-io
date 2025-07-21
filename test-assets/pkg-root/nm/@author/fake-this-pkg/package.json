@@ -1,3 +1,4 @@
 {
-  "name": "@author/fake-this-pkg"
+  "name": "@author/fake-this-pkg",
+  "type": "module"
 }

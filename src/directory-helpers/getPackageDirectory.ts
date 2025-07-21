@@ -1,12 +1,12 @@
 
 
-import { fileIoNode } from '../fileIoNode';
-import { fileIoSyncNode } from '../fileIoSyncNode';
-import { IFileIo, IFileIoSync } from '../types';
-import { getInvokedScriptDirectory, getInvokedScriptDirectorySync } from './getInvokedScriptDirectory';
-import { getCallingScriptDirectory, getCallingScriptDirectorySync } from './getCallingScriptDirectory';
+import { fileIoNode } from '../fileIoNode.js';
+import { fileIoSyncNode } from '../fileIoSyncNode.js';
+import type { IFileIo, IFileIoSync } from '../types.js';
+import { getInvokedScriptDirectory, getInvokedScriptDirectorySync } from './getInvokedScriptDirectory.js';
+import { getCallingScriptDirectory, getCallingScriptDirectorySync } from './getCallingScriptDirectory.js';
 import * as path from 'path';
-import { readJsonFromFile, readJsonFromFileSync } from '../file-helpers';
+import { readJsonFromFile, readJsonFromFileSync } from '../file-helpers/index.js';
 import { dLog } from '@andyrmitchell/utils';
 
 
@@ -103,7 +103,9 @@ async function pickStartingDirectoryAsync(target:Target, verbose?: boolean):Prom
 async function listPackagesUpwardsAsync(fileIo:IFileIo, startFromDirectory:string, verbose?: boolean):Promise<Package[]> {
     let packageUris:string[] = [];
     while(true) {
-        packageUris = [...packageUris, ...(await fileIo.list_files(startFromDirectory, {file_pattern: /^package\.json$/i})).map(x => x.uri)];
+        const listedFiles = await fileIo.list_files(startFromDirectory, {file_pattern: /^package\.json$/i});
+        const newFileUris = listedFiles.map(x => x.uri);
+        packageUris = [...packageUris, ...newFileUris];
         startFromDirectory = await fileIo.directory_name(startFromDirectory);
         if( !directoryHasParent(startFromDirectory) ) break;
     }

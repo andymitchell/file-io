@@ -1,3 +1,4 @@
 {
-  "name": "fake-this-pkg2"
+  "name": "fake-this-pkg2",
+  "type": "module"
 }

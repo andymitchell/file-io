@@ -1,7 +1,7 @@
 
 
-import { fileIoSyncNode } from "./fileIoSyncNode";
-import { iFileIoTests } from "./utils/iFileIoTests";
+import { fileIoSyncNode } from "./fileIoSyncNode.js";
+import { iFileIoTests } from "./utils/iFileIoTests.js";
 
 describe('fileIoNode test', () => {
     

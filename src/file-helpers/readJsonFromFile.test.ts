@@ -1,5 +1,5 @@
-import { getPackageDirectoryForSelfInTesting } from "../directory-helpers/getPackageDirectory"
-import { readJsonFromFile, readJsonFromFileSync } from "./readJsonFromFile"
+import { getPackageDirectoryForSelfInTesting } from "../directory-helpers/getPackageDirectory.js"
+import { readJsonFromFile, readJsonFromFileSync } from "./readJsonFromFile.js"
 
 const TEST_ASSETS_DIR = `${getPackageDirectoryForSelfInTesting()}/test-assets/json`
 describe("readJsonFromFile", () => {

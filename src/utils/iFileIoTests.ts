@@ -1,8 +1,8 @@
 
-import { existsSync, mkdirSync, rmdirSync, writeFileSync, rmSync, statSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, rmSync, statSync } from 'fs';
 import * as path from 'path';
-import { IFileIo, IFileIoSync } from '../types';
-import { getPackageDirectoryForSelfInTesting } from '../directory-helpers/getPackageDirectory';
+import type { IFileIo, IFileIoSync } from '../types.js';
+import { getPackageDirectoryForSelfInTesting } from '../directory-helpers/getPackageDirectory.js';
 
 
 
@@ -13,7 +13,7 @@ export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
     let TMP_DIR:string;
     beforeAll(async () => {
         TMP_DIR = `${TMP_DIR_ROOT}/${Math.round(Math.random()*1000000)+''}`;
-        rmSync(TMP_DIR_ROOT, { recursive: true, force: true });
+        rmSync(TMP_DIR_ROOT, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     });
     afterAll(async () => {
         rmSync(TMP_DIR_ROOT, { recursive: true, force: true });

@@ -1,5 +1,5 @@
-import { backupFileSync } from "./backupFileSync";
-import { readJsonFromFile, readJsonFromFileSync } from "./readJsonFromFile";
+import { backupFileSync } from "./backupFileSync.js";
+import { readJsonFromFile, readJsonFromFileSync } from "./readJsonFromFile.js";
 
 export {
     backupFileSync,

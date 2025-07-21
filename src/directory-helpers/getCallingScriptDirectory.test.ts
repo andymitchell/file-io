@@ -1,5 +1,5 @@
-import { getCallingScriptDirectorySync } from "./getCallingScriptDirectory";
-import {useGetCallingScriptDirectory} from '../../test-assets/outside-dir/useGetCallingScriptDirectory';
+import { getCallingScriptDirectorySync } from "./getCallingScriptDirectory.js";
+import {useGetCallingScriptDirectory} from '../../test-assets/outside-dir/useGetCallingScriptDirectory.js';
 
 describe('getCallingScriptDirectory', () => {
     
@@ -15,7 +15,6 @@ describe('getCallingScriptDirectory', () => {
 
     test('basic - begins with /', () => {
         const result = getCallingScriptDirectorySync();
-        debugger;
         expect(result[0]).toBe('/');
         
 
@@ -23,9 +22,9 @@ describe('getCallingScriptDirectory', () => {
     });
 
     test('exclude until function name', () => {
-        const result = getCallingScriptDirectorySync('Object.<anonymous>');
+        const result = getCallingScriptDirectorySync('runTest');
         const parts = result.split('/');
-        expect(parts[parts.length-1]).toBe("build"); // Full line <local path>/file-io/node_modules/jest-circus/build/utils.js
+        expect(parts[parts.length-1]).toBe("process"); // Full line processTicksAndRejections (node:internal/process/task_queues:105:5)'
 
     })
 

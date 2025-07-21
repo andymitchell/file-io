@@ -5,22 +5,11 @@
   "description": "Abstraction for working with the file system in any environment (currently only Node)",
   "exports": {
     ".": {
-      "module": "./dist/index.mjs",
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "type": "commonjs",
+  "type": "module",
   "files": [
     "dist",
     "README.MD",
@@ -35,8 +24,8 @@
     "pkglint": "./build/publint_pipeable.sh",
     "build_prepare": "npm run build && npm run pkglint",
     "prepublishOnly": "npm run build_prepare",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
     "test_cli:user_input": "npx tsup-node --no-config --format esm --entry.test_cli_user_input ./src/user-input/examples/index.ts && node ./dist/test_cli_user_input.mjs && rm ./dist/test_cli_user_input.mjs",
     "test_cli:spawn_like_exec": "npx tsup-node --no-config --format esm --entry.test_cli_spawn_like_exec ./src/utils/spawnLikeExec.example.ts && node ./dist/test_cli_spawn_like_exec.mjs && rm ./dist/test_cli_spawn_like_exec.mjs",
     "test_cli:get_calling_directory": "npx tsup-node --no-config --format esm --entry.test_cli_get_calling_directory ./test-assets/cli/get-calling-script/index.ts && node ./dist/test_cli_get_calling_directory.mjs && rm ./dist/test_cli_get_calling_directory.mjs"
@@ -44,20 +33,14 @@
   "author": "andymitchell",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.23.9",
-    "@babel/preset-env": "^7.23.9",
-    "@babel/preset-typescript": "^7.23.3",
-    "@supabase/supabase-js": "^2.43.4",
     "@types/inquirer": "^9.0.7",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.0",
+    "@types/node": "^24.0.15",
     "@types/proper-lockfile": "^4.1.4",
-    "babel-jest": "^29.7.0",
     "babel-plugin-transform-import-meta": "^2.2.1",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.1.2",
-    "tsup": "^8.0.1",
-    "typescript": "^5.4.5"
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@andyrmitchell/utils": "^0.21.1",

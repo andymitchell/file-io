@@ -2,7 +2,7 @@
 
 // Run locally with `npm run test_cli:user_input`
 
-import { UserInputNode } from "../UserInputNode";
+import { UserInputNode } from "../UserInputNode.js";
 
 async function main() {
     const userInput = new UserInputNode();

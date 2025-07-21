@@ -1,4 +1,4 @@
-import { stripTrailingSlash } from './stripTrailingSlash';
+
 import { fileURLToPath } from 'url';
 import * as path from 'path';
 import { dLog } from '@andyrmitchell/utils';
@@ -44,16 +44,16 @@ export function getCallingScriptDirectorySync(excludeAdditionalFunctionName?:str
 
     if( verbose ) dLog('getCallingScriptDirectory', 'stack lines', stackLines);
 
-    
-    
     // Find the line in the stack that does not include this file
     let foundAdditionalFunctionName = excludeAdditionalFunctionName? false : true;
     for (const line of stackLines) {
         if (!line.includes(functionSignatureInStackTrace(thisFunctionName)) ) {
-            const match = line.match(/\((.*?):\d+:\d+\)/);
+            let match = line.match(/\((.*?):\d+:\d+\)/);
+            if( !match ) match = line.match(/(.*?):\d+:\d+/);
             if (match && foundAdditionalFunctionName ) {
-                const callingFile = match[1];
+                let callingFile = match[1];
                 if( !callingFile ) throw new Error("Could not find calling file in stack trace");
+                callingFile = callingFile.replace(/^\s+at\s+/, '');
                 const callingDirectory = stripFileUriPrefix(path.dirname(callingFile))
                 if( verbose ) dLog('getCallingScriptDirectory', 'found callingFile: ', {callingFile, callingDirectory});
                 return callingDirectory;

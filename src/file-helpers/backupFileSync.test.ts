@@ -1,15 +1,15 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "fs";
-import { getPackageDirectoryForSelfInTesting } from "../directory-helpers/getPackageDirectory";
+import { getPackageDirectoryForSelfInTesting } from "../directory-helpers/getPackageDirectory.js";
 import * as path from 'path';
-import { backupFileSync } from "./backupFileSync";
-import { fileIoSyncNode } from "../fileIoSyncNode";
+import { backupFileSync } from "./backupFileSync.js";
+import { fileIoSyncNode } from "../fileIoSyncNode.js";
 
 describe('backupFileSync', () => {
     const TMP_DIR_ROOT = `${getPackageDirectoryForSelfInTesting()}/tmp_backupFile_tests`;
     let TMP_DIR:string;
     beforeAll(async () => {
         TMP_DIR = `${TMP_DIR_ROOT}/${Math.round(Math.random()*1000000)+''}`;
-        rmSync(TMP_DIR_ROOT, { recursive: true, force: true });
+        rmSync(TMP_DIR_ROOT, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     });
     afterAll(async () => {
         rmSync(TMP_DIR_ROOT, { recursive: true, force: true });

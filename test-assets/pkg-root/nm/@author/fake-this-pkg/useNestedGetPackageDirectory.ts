@@ -1,4 +1,4 @@
-import { getPackageDirectory, getPackageDirectorySync } from "../../../../../src/directory-helpers/getPackageDirectory";
+import { getPackageDirectory, getPackageDirectorySync } from "../../../../../src/directory-helpers/getPackageDirectory.js";
 
 
 export async function useNestedGetPackageDirectoryAny(getPackageDirectoryAny: typeof getPackageDirectorySync | typeof getPackageDirectory) {

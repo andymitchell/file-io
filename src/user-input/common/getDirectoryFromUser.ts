@@ -1,6 +1,6 @@
 
-import { IFileIo } from "../../types";
-import { IUserInput, QuestionChoice } from "../types";
+import type { IFileIo } from "../../types.js";
+import type { IUserInput, QuestionChoice } from "../types.js";
 
 export async function getDirectoryFromUser(userInput:IUserInput, fileSystem:IFileIo, currentDirectory:string, name: string, message:string, suggestedDirs:string[]):Promise<string | undefined> {
     const chosenDir = await userInput.ask({

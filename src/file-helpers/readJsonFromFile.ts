@@ -1,7 +1,7 @@
 
-import { IFileIo, IFileIoSync } from '../types';
-import { fileIoNode } from '../fileIoNode';
-import { fileIoSyncNode } from '../fileIoSyncNode';
+import type { IFileIo, IFileIoSync } from '../types.js';
+import { fileIoNode } from '../fileIoNode.js';
+import { fileIoSyncNode } from '../fileIoSyncNode.js';
 import JSON5 from 'json5';
 
 type DefaultObject = Record<string, any>;

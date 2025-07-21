@@ -1,7 +1,7 @@
-import { UserInputNode } from "./UserInputNode";
-import { getDirectoryFromUser } from "./common/getDirectoryFromUser";
-import { TestQuestionAnswerMap, TestUserInput } from "./test-helper/TestUserInput";
-import { Answer, IUserInput, QuestionChain, QuestionChoice } from "./types";
+import { UserInputNode } from "./UserInputNode.js";
+import { getDirectoryFromUser } from "./common/getDirectoryFromUser.js";
+import { type TestQuestionAnswerMap, TestUserInput } from "./test-helper/TestUserInput.js";
+import type { Answer, IUserInput, QuestionChain, QuestionChoice } from "./types.js";
 
 export {
     UserInputNode,

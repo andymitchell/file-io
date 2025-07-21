@@ -1,11 +1,11 @@
-import { IFileIo } from "./types";
+import type { IFileIo } from "./types.js";
 import { promises as fs } from 'fs';
-import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash";
+import { stripTrailingSlash } from "./directory-helpers/stripTrailingSlash.js";
 import { exec } from 'child_process';
 import * as path from 'path';
 import  {dirname, relative} from 'path';
-import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage";
-import { spawnLikeExec } from "./utils/spawnLikeExec";
+import { getErrorMessage, isFileErrorNotExists } from "./utils/getErrorMessage.js";
+import { spawnLikeExec } from "./utils/spawnLikeExec.js";
 
 async function makeDirectoryIfNotExists(pathOrFile:string):Promise<void> {
     const destinationDirectory = await fileIoNode.directory_name(pathOrFile);
@@ -57,20 +57,26 @@ export const fileIoNode:IFileIo = {
     },
     async list_files(absolutePathDirectory, options?) {
         try {
+            
+
             let files = await fs.readdir(absolutePathDirectory, {'recursive': options?.recurse, 'withFileTypes': true});
 
-            return files
+            
+
+            const found = files
                 .filter(x => {
                     return x.isFile() && (!options?.file_pattern || options?.file_pattern.test(x.name))
                 })
                 .map(x => {
-                    const path = stripTrailingSlash(x.parentPath ?? x.path);
+                    const path = stripTrailingSlash(x.parentPath);
                     return {
                         file: x.name, 
                         path,
                         uri: `${path}/${x.name}`
                     }
                 });
+            
+            return found;
         } catch(e) {
             throw new Error(`Cannot list files ${absolutePathDirectory}. Error: ${getErrorMessage(e)}`);
         }

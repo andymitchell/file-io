@@ -1,12 +1,18 @@
 {
     "compilerOptions": {
-        "moduleResolution": "node",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
         "strict": true,
         "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "noUnusedLocals": true,
+        "verbatimModuleSyntax": true,
+        "target": "ESNext",
         "allowSyntheticDefaultImports": true,
-        "target": "ES2020",
+        "noEmit": true,
+        "allowImportingTsExtensions": true,
         "lib": [
-            "ES2020",
+            "ESNext",
             "DOM",
             "DOM.Iterable"
         ]

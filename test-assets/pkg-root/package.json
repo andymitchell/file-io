@@ -1,4 +1,5 @@
 {
-    "name": "@andyrmitchell/pkg-root"
+    "name": "@andyrmitchell/pkg-root",
+    "type": "module"
   }
   

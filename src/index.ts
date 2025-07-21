@@ -1,6 +1,6 @@
-import { fileIoNode } from './fileIoNode';
-import { fileIoSyncNode } from './fileIoSyncNode';
-import { IFileIo, IFileIoSync } from './types';
+import { fileIoNode } from './fileIoNode.js';
+import { fileIoSyncNode } from './fileIoSyncNode.js';
+import type { IFileIo, IFileIoSync } from './types.js';
 
 export {
     fileIoNode,
@@ -12,7 +12,7 @@ export type {
     IFileIoSync
 }
 
-export * from './user-input';
-export * from './directory-helpers';
-export * from './file-helpers';
+export * from './user-input/index.js';
+export * from './directory-helpers/index.js';
+export * from './file-helpers/index.js';
 

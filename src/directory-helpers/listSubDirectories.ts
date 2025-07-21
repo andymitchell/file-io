@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
-import { stripTrailingSlash } from './stripTrailingSlash';
+import { stripTrailingSlash } from './stripTrailingSlash.js';
 
 export async function listSubDirectories(initialDirectoryAbsolutePath: string, excludeDirectories?:string[], filterNames?:RegExp) {
     const results: string[] = [];
