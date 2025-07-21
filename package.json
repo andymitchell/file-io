@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@andyrmitchell/utils": "^0.21.1",
-    "inquirer": "^12.8.0",
+    "inquirer": "^9.3.7",
     "json5": "^2.2.3"
   }
 }
