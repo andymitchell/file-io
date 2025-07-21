@@ -33,7 +33,7 @@ export class TestUserInput implements IUserInput {
     }
 }
 
-async function example() {
+export async function runTestUserInputExample() {
     const testUserInput = new TestUserInput({
         'q_will_you': {type: 'confirmation', answer: true},
     })
