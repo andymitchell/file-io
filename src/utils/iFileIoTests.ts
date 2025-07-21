@@ -7,26 +7,29 @@ import { getPackageDirectoryForSelfInTesting } from '../directory-helpers/getPac
 
 
 
-export function iFileIoTests(fileIo:IFileIo | IFileIoSync) {
+export function iFileIoTests(fileIo:IFileIo | IFileIoSync, mode: 'IFileIo' | 'IFileIoSync') {
     
-    const TMP_DIR_ROOT = `${getPackageDirectoryForSelfInTesting()}/tmp_ifileio_tests`;
+    const TMP_DIR_ROOT = `${getPackageDirectoryForSelfInTesting()}/tmp_ifileio_tests/${mode}`;
     let TMP_DIR:string;
-    beforeAll(async () => {
-        TMP_DIR = `${TMP_DIR_ROOT}/${Math.round(Math.random()*1000000)+''}`;
+    let i = 0;
+    beforeAll(() => {
         rmSync(TMP_DIR_ROOT, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     });
-    afterAll(async () => {
-        rmSync(TMP_DIR_ROOT, { recursive: true, force: true });
+    afterAll(() => {
+        if( existsSync(TMP_DIR_ROOT) ) {
+            rmSync(TMP_DIR_ROOT, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+        }
     });
 
     beforeEach(() => {
+        TMP_DIR = `${TMP_DIR_ROOT}/${Math.round(Math.random()*1000000)+''}${i++}`;
         if (!existsSync(TMP_DIR)) {
             mkdirSync(TMP_DIR, {recursive: true});
         }
     });
     
     afterEach(() => {
-        rmSync(TMP_DIR, { recursive: true, force: true });
+        //rmSync(TMP_DIR, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     });
 
     test('reads a file', async () => {

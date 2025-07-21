@@ -5,5 +5,5 @@ import { iFileIoTests } from "./utils/iFileIoTests.js";
 describe('fileIoNode test', () => {
     
 
-    iFileIoTests(fileIoNode);
+    iFileIoTests(fileIoNode, 'IFileIo');
 })
