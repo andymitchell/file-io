@@ -1,18 +1,35 @@
-import { fileIoNode } from './fileIoNode.js';
-import { fileIoSyncNode } from './fileIoSyncNode.js';
-import type { IFileIo, IFileIoSync } from './types.js';
+import { backupFileSync } from "./commands/file/backup-file/backupFileSync.ts";
+import { copyFileSync } from "./commands/file/copy-file/copyFileSync.ts";
+import { lsSync } from "./commands/file/ls/lsSync.ts";
+import { pathInfoSync } from "./commands/file/path-info/pathInfoSync.ts";
+import { readJsonFile } from "./commands/file/read-json-file/readJsonFile.ts";
+import { relative } from "./commands/file/relative/relative.ts";
+import { removeDirectory } from "./commands/file/remove-directory/removeDirectory.ts";
+import { removeFile } from "./commands/file/remove-file/removeFile.ts";
+import { stripTrailingSlash } from "./commands/file/strip-trailing-slash/stripTrailingSlash.ts";
+import { thisDir } from "./commands/file/this-dir/thisDir.ts";
+import { writeSync } from "./commands/file/write/writeSync.ts";
+import { execute } from "./commands/terminal/execute/execute.ts";
+import  { spawnLikeExec } from "./commands/terminal/execute/spawnLikeExec.ts";
+
 
 export {
-    fileIoNode,
-    fileIoSyncNode
+    backupFileSync,
+    copyFileSync,
+    lsSync,
+    pathInfoSync,
+    readJsonFile,
+    relative,
+    removeDirectory,
+    removeFile, 
+    stripTrailingSlash,
+    thisDir, 
+    writeSync
 }
 
-export type {
-    IFileIo,
-    IFileIoSync
+export {
+    execute,
+    spawnLikeExec,
 }
 
-export * from './user-input/index.js';
-export * from './directory-helpers/index.js';
-export * from './file-helpers/index.js';
-
+export * from './commands/terminal/user-input/index.ts';

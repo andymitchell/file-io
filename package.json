@@ -1,51 +1,57 @@
 {
-  "name": "@andyrmitchell/file-io",
-  "is_andyrmitchell_file_io_package": true,
-  "version": "0.11.0",
-  "description": "Abstraction for working with the file system in any environment (currently only Node)",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+    "name": "@andyrmitchell/file-io",
+    "is_andyrmitchell_file_io_package": true,
+    "version": "0.11.0",
+    "description": "Abstraction for working with the file system in any environment (currently only Node)",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./old": {
+            "types": "./dist/index-old.d.ts",
+            "default": "./dist/index-old.js"
+        }
+    },
+    "type": "module",
+    "files": [
+        "dist",
+        "README.MD",
+        "LICENSE"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build_release": "npm run build_prepare && np",
+        "build": "tsup",
+        "pkglint": "./build/publint_pipeable.sh",
+        "build_prepare": "npm run build && npm run pkglint",
+        "prepublishOnly": "npm run build_prepare",
+        "test": "vitest",
+        "test:watch": "vitest --watch",
+        "test_cli:user_input": "npx tsup-node --no-config --format esm --entry.test_cli_user_input ./src/user-input/examples/index.ts && node ./dist/test_cli_user_input.mjs && rm ./dist/test_cli_user_input.mjs",
+        "test_cli:spawn_like_exec": "npx tsup-node --no-config --format esm --entry.test_cli_spawn_like_exec ./src/utils/spawnLikeExec.example.ts && node ./dist/test_cli_spawn_like_exec.mjs && rm ./dist/test_cli_spawn_like_exec.mjs",
+        "test_cli:get_calling_directory": "npx tsup-node --no-config --format esm --entry.test_cli_get_calling_directory ./old-test-assets/cli/get-calling-script/index.ts && node ./dist/test_cli_get_calling_directory.mjs && rm ./dist/test_cli_get_calling_directory.mjs"
+    },
+    "author": "andymitchell",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/inquirer": "^9.0.7",
+        "@types/jest": "^29.5.12",
+        "@types/node": "^24.0.15",
+        "@types/proper-lockfile": "^4.1.4",
+        "babel-plugin-transform-import-meta": "^2.2.1",
+        "tsup": "^8.5.0",
+        "typescript": "^5.8.3",
+        "vitest": "^3.2.4"
+    },
+    "dependencies": {
+        "@andyrmitchell/utils": "^0.21.1",
+        "find-up": "^7.0.0",
+        "glob": "^11.0.3",
+        "inquirer": "^9.3.7",
+        "json5": "^2.2.3"
     }
-  },
-  "type": "module",
-  "files": [
-    "dist",
-    "README.MD",
-    "LICENSE"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "scripts": {
-    "build_release": "npm run build_prepare && np",
-    "build": "tsup",
-    "pkglint": "./build/publint_pipeable.sh",
-    "build_prepare": "npm run build && npm run pkglint",
-    "prepublishOnly": "npm run build_prepare",
-    "test": "vitest",
-    "test:watch": "vitest --watch",
-    "test_cli:user_input": "npx tsup-node --no-config --format esm --entry.test_cli_user_input ./src/user-input/examples/index.ts && node ./dist/test_cli_user_input.mjs && rm ./dist/test_cli_user_input.mjs",
-    "test_cli:spawn_like_exec": "npx tsup-node --no-config --format esm --entry.test_cli_spawn_like_exec ./src/utils/spawnLikeExec.example.ts && node ./dist/test_cli_spawn_like_exec.mjs && rm ./dist/test_cli_spawn_like_exec.mjs",
-    "test_cli:get_calling_directory": "npx tsup-node --no-config --format esm --entry.test_cli_get_calling_directory ./test-assets/cli/get-calling-script/index.ts && node ./dist/test_cli_get_calling_directory.mjs && rm ./dist/test_cli_get_calling_directory.mjs"
-  },
-  "author": "andymitchell",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/inquirer": "^9.0.7",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^24.0.15",
-    "@types/proper-lockfile": "^4.1.4",
-    "babel-plugin-transform-import-meta": "^2.2.1",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
-  },
-  "dependencies": {
-    "@andyrmitchell/utils": "^0.21.1",
-    "glob": "^11.0.3",
-    "inquirer": "^9.3.7",
-    "json5": "^2.2.3"
-  }
 }

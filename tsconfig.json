@@ -19,7 +19,7 @@
     },
     "include": [
         "src/**/*",
-        "test-assets/outside-dir/*",
-        "test-assets/pkg-root/nm/@author/fake-this-pkg/*"
+        "old-test-assets/outside-dir/*",
+        "old-test-assets/pkg-root/nm/@author/fake-this-pkg/*"
     ]
 }
