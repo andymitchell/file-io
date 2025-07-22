@@ -81,6 +81,7 @@ describe('getPackageDirectorySync: CWD Mode (`{type: "cwd"}`)', () => {
         expect(result.success).toBe(true);
         if (result.success) {
             expect(result.packageJsonPath).toBe(privatifyPath(rootPackageJsonPath));
+            expect(result.packageDirectoryPath).toBe(privatifyPath(projectRootDir));
         }
     });
 

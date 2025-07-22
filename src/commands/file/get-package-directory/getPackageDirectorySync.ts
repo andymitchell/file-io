@@ -8,10 +8,17 @@ import { findUpSync } from 'find-up';
 import { absolute } from '../absolute/absolute.ts';
 import { convertUnknownToError } from '../../../utils/convertUnknownToError.ts';
 import { existsSync } from 'fs';
+import { dirname } from 'path';
 
 
 type SuccessResponse = {
     success: true,
+
+    /**
+     * The absolute path to **directory** that contains the package.json file
+     */
+    packageDirectoryPath: string,
+
     /**
      * The absolute path to the package.json file
      */
@@ -132,7 +139,9 @@ function _getPackageDirectorySync(inOrUpFrom?:InOrUpFrom):Response {
             return {success: false, error: new Error("Could not find package.json. "+errorTip)};
         }
         
-        return {success:true, packageJsonPath: absolute(result)};
+        const packageJsonPath = absolute(result);
+        const packageDirectoryPath = dirname(packageJsonPath);
+        return {success:true, packageJsonPath, packageDirectoryPath};
     } catch(e) {
         const error = convertUnknownToError(e);
 
