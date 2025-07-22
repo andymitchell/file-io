@@ -64,7 +64,7 @@ describe('backupFileSync', () => {
         expect(faultyBackup).toThrow("Only supports files");
     });
 
-    test('should create a backup of a file with the default naming scheme', () => {
+    test.only('should create a backup of a file with the default naming scheme', () => {
         const filePath = path.join(testDir, 'test.txt');
         const content = 'Hello, Vitest!';
         writeFileSync(filePath, content);
@@ -78,6 +78,9 @@ describe('backupFileSync', () => {
 
         const backupContent = readFileSync(backupUri!, 'utf-8');
         expect(backupContent).toBe(content);
+
+        // e.g. /test_20250722090839521-0.txt.bak
+        expect(backupUri).toMatch(/\/test_\d+\-0\.txt\.bak$/);
     });
 
     test('should create unique backup files on successive calls', async () => {
@@ -108,7 +111,7 @@ describe('backupFileSync', () => {
         const content = 'Custom backup name.';
         writeFileSync(filePath, content);
 
-        const customBackupName = "my-special-backup.bak";
+        const customBackupName = "my-special-backup.txt.bak";
         const getCustomBackupFile = (details: FileInfo) => {
             return {
                 uri: path.join(details.dirname, customBackupName),

@@ -26,6 +26,7 @@ describe('pathInfoSync', () => {
         fs.writeFileSync(path.join(testDir, 'file-no-extension'), '');
         fs.writeFileSync(path.join(testDir, 'archive.tar.gz'), '');
         fs.writeFileSync(path.join(testDir, 'real-file.md'), '# content');
+        fs.writeFileSync(path.join(testDir, 'no-extension'), 'oops i am typeless');
 
         // Create symbolic links for testing
         // Use 'dir' and 'file' type hints for cross-platform compatibility (especially Windows)
@@ -144,26 +145,42 @@ describe('pathInfoSync', () => {
      * We include this test to achieve full coverage and highlight this defensive code path.
      */
     describe('Edge Case Coverage', () => {
-        let originalCwd: string;
+        describe('relative paths', () => {
+            let originalCwd: string;
 
-        beforeAll(() => {
-            originalCwd = process.cwd();
-            process.chdir(testDir); // Change working directory to our temp dir
-        });
+            beforeAll(() => {
+                originalCwd = process.cwd();
+                process.chdir(testDir); // Change working directory to our temp dir
+            });
 
-        afterAll(() => {
-            process.chdir(originalCwd); // Change back to original CWD
-        });
+            afterAll(() => {
+                process.chdir(originalCwd); // Change back to original CWD
+            });
 
-        it('should handle relative paths correctly to cover the dirname === "." case', () => {
-            // Passing a relative path, which path.dirname() will resolve to '.'
-            const result = pathInfoSync('file.txt') as FileInfo;
+            it('should handle relative paths correctly to cover the dirname === "." case', () => {
+                // Passing a relative path, which path.dirname() will resolve to '.'
+                const result = pathInfoSync('file.txt') as FileInfo;
 
+                expect(result.type).toBe('file');
+                expect(result.basename).toBe('file.txt');
+                expect(result.dirname).toBe(''); // dirname becomes '' as per the function logic
+                expect(result.name).toBe('file');
+                expect(result.uri).toBe('file.txt'); // uri is constructed without a leading path
+            });
+        })
+
+        it('will handle something with no extension', () => {
+            const filePath = path.join(testDir, 'no-extension');
+            const result = pathInfoSync(filePath) as FileInfo;
+
+            console.log({result})
             expect(result.type).toBe('file');
-            expect(result.basename).toBe('file.txt');
-            expect(result.dirname).toBe(''); // dirname becomes '' as per the function logic
-            expect(result.name).toBe('file');
-            expect(result.uri).toBe('file.txt'); // uri is constructed without a leading path
-        });
+            expect(result.basename).toBe('no-extension');
+            expect(result.extension).toBe('');
+            expect(result.extension_inc_dot).toBe('');
+            expect(result.name).toBe('no-extension');
+            expect(result.dirname).toBe(testDir);
+            expect(result.uri).toBe(filePath);
+        })
     });
 });

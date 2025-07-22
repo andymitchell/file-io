@@ -7,12 +7,46 @@ import type { FileInfo } from "../path-info/types.ts";
 
 
 /**
- * Create a backup of the given file
- * @param absoluteFileUri The file to back up
- * @param getBackupFile Optional custom way to generate the backup text in the new file name
- * @returns The backup file uri 
+ * Creates a backup of the specified file by copying it to a new uniquely named file
+ * in the same directory, using a timestamp and counter to avoid overwriting.
+ * 
+ * If the file doesn't exist or is a directory, no backup is created.
+ * 
+ * You can optionally provide a custom backup file-naming function.
+ * 
+ * @param absoluteFileUri Absolute path to the file to back up.
+ * @param getBackupFile - Optional. A callback that, given the file’s `FileInfo`,
+ *                        returns an object with:
+ *                        - `uri?: string` – full path for the backup file
+ *                        - `file?: string` – file name only (for informational use)
+ *                        Defaults to a timestamped `*.bak` naming scheme.
+ * 
+ * @returns The URI of the created backup file, or `undefined` if the original file was missing.
+ * 
+ * @throws Will throw an error if:
+ * - The path points to a directory instead of a file.
+ * - All possible backup names are taken (after 10 attempts).
+ * - Copying the file fails.
+ * 
+ * 
  * @example
- * Given /a/b/c.txt it'll generate /a/b/c.backup_20240101010.txt (or a higher number until it finds a unique name)
+ * ```ts
+ * const uri = backupFileSync('/data/config.json');
+ * console.log(uri); 
+ * // -> '/data/config_20250722083015432-0.bak' (or next available slot)
+ * // the slot (0 here) increments if another backup exists at the same millisecond
+ * ```
+ * 
+ * @example
+ * ```ts
+ * // Custom naming strategy
+ * const uri = backupFileSync('/logs/app.log', ({ name, dirname }) => {
+ *   const file = `${name}.backup.bak`;
+ *   return { uri: `${dirname}/${file}`, file };
+ * });
+ * console.log(uri); 
+ * // -> '/logs/app.backup.bak'
+ * ```
  */
 export function backupFileSync(absoluteFileUri:string, getBackupFile: GetBackupName = getBackupFileDefault):string | undefined {
     if( !existsSync(absoluteFileUri) ) return undefined;
@@ -42,7 +76,7 @@ const getBackupFileDefault:GetBackupName = (d:FileInfo) => {
     let c = 0;
     while(c<10) {
         
-        file = `${d.name}_${getFormattedDate()}-${c}.bak`;
+        file = `${d.name}_${getFormattedDate()}-${c}${d.extension_inc_dot}.bak`;
         uri = `${d.dirname}/${file}`;
         if( !existsSync(uri) ) {
             break;

@@ -13,11 +13,54 @@ import { pathInfoSync } from '../path-info/pathInfoSync.ts';
 
 
 /**
- * A helpful wrapper around glob that's easier/faster to remember 
+ * Synchronously lists files and/or directories under a given directory.
+ *
+ * Designed to be easier to remember than glob, and safer than readdir* (it handles symlinks 
+ * while avoiding infinite loops).
  * 
- * @param absolutePathDirectory The initial directory
- * @param options `LsOptions`
- * @returns 
+ * @param absolutePathDirectory Absolute path to the directory to list contents from.
+ * @param options Optional filtering and behavior controls:
+ * 
+ * - `recursive` — Whether to search subdirectories. Default: `false`
+ * - `type` — `'file'`, `'dir'`, or `'both'`. Default: `'both'`
+ * - `file_pattern` — Filter filenames by glob pattern (string) or RegExp. RegExp is slower. Default: `null`
+ * - `follow` — Whether to follow symlinks during recursive search. Default: `false`
+ * - `ignore` — Glob-style ignore patterns. Default: `[]`
+ * - `globOptions` — Additional options passed to `glob`. Note: `cwd` and `absolute` are ignored.
+ * 
+ * @returns Array of `PathInfo` objects, describing the matched files/directories.
+ * 
+ * @throws Will throw an error if the listing operation fails.
+ * 
+ * 
+ * @example
+ * // List all files and directories (non-recursive) in `/some/folder`
+ * const items = lsSync('/some/folder');
+ * 
+ * @example
+ * // List all files (non-recursive) in `/some/folder`
+ * const items = lsSync('/some/folder', { type: 'file' });
+ * 
+ * @example
+ * // List all `.ts` files recursively
+ * const tsFiles = lsSync('/project/src', { 
+ *   recursive: true,
+ *   type: 'file',
+ *   file_pattern: '*.ts' 
+ * });
+ * 
+ * @example
+ * // List only files matching `/^test/i` (case-insensitive) in the given directory
+ * const dirs = lsSync('/project', {
+ *   file_pattern: /^test/i  // using `file_pattern` forces `type` to be `file`
+ * });
+ * 
+ * @example
+ * // List everything except node_modules
+ * const all = lsSync('/project', { 
+ *   recursive: true,
+ *   ignore: ['** /node_modules/**']  // remove space in the glob pattern
+ * });
  */
 export function lsSync(absolutePathDirectory: string, options?: LsOptions):PathInfo[] {
     /* Design decisions:

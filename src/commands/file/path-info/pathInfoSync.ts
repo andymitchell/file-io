@@ -3,6 +3,58 @@ import fs from "node:fs";
 import { stripTrailingSlash } from "../strip-trailing-slash/stripTrailingSlash.ts";
 import type { PathInfo } from "./types.ts";
 
+/**
+ * Retrieve detailed information about a file or directory at the given absolute path.
+ *
+ * @param {string} absolutePathToFile - An absolute path to a file or directory.
+ * @returns {PathInfo} Information about the path:
+ *  - If the path is a directory:
+ *    - `type`: `'dir'`
+ *    - `dirname`: the directory path, without a trailing slash
+ *    - `uri`: same as `dirname`
+ *  - If the path is a file:
+ *    - `type`: `'file'`
+ *    - `basename`: the filename including extension (e.g. `foo.txt`)
+ *    - `name`: the filename without its extension (e.g. `foo`)
+ *    - `extension`: the file extension without the leading dot (e.g. `txt`)
+ *    - `extension_inc_dot`: the file extension including the leading dot (e.g. `.txt`)
+ *    - `dirname`: the directory path containing the file, without a trailing slash
+ *    - `uri`: a URI‑style string combining `dirname` and `basename`
+ *
+ * @throws {Error} If the path does not exist or cannot be accessed.
+ *
+ * @example
+ * ```ts
+ * // Directory example
+ * import { pathInfoSync } from './pathInfoSync';
+ *
+ * const dirInfo = pathInfoSync('/usr/local/bin/');
+ * console.log(dirInfo);
+ * // {
+ * //   type: 'dir',
+ * //   dirname: '/usr/local/bin',
+ * //   uri: '/usr/local/bin'
+ * // }
+ * ```
+ *
+ * @example
+ * ```ts
+ * // File example
+ * import { pathInfoSync } from './pathInfoSync';
+ *
+ * const fileInfo = pathInfoSync('/usr/local/bin/node.exe');
+ * console.log(fileInfo);
+ * // {
+ * //   type: 'file',
+ * //   basename: 'node.exe',
+ * //   name: 'node',
+ * //   extension: 'exe',
+ * //   extension_inc_dot: '.exe',
+ * //   dirname: '/usr/local/bin',
+ * //   uri: '/usr/local/bin/node.exe'
+ * // }
+ * ```
+ */
 export function pathInfoSync(absolutePathToFile: string): PathInfo {
     const stats = fs.statSync(absolutePathToFile);
 
