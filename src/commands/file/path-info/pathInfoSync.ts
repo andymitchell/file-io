@@ -1,11 +1,11 @@
-import path from "node:path";
+import {dirname as nodeDirname, basename as nodeBasename, extname as nodeExtname} from 'path';
 import {existsSync, statSync} from "node:fs";
 import { stripTrailingSep } from "../strip-trailing-sep/stripTrailingSep.ts";
 import type { PathInfo } from "./types.ts";
 import { absolute } from "../absolute/absolute.ts";
 
 /**
- * Retrieve detailed information about a file or directory at the given absolute path.
+ * Retrieve detailed information about a file or directory at the given absolute 
  *
  * @param {string} absolutePathToFile - An absolute path to a file or directory.
  * @returns {PathInfo} Information about the path:
@@ -77,11 +77,11 @@ export function pathInfoSync(pathToFile: string, throwError?:boolean): PathInfo 
             };
         }
 
-        let dirname = stripTrailingSep(path.dirname(absolutePathToFile));
+        let dirname = stripTrailingSep(nodeDirname(absolutePathToFile));
         if (dirname === '.') dirname = '';
-        const basename = path.basename(absolutePathToFile);
-        const name = path.basename(absolutePathToFile, path.extname(absolutePathToFile)); // (filename without extension)
-        const extension_inc_dot = path.extname(absolutePathToFile);
+        const basename = nodeBasename(absolutePathToFile);
+        const name = nodeBasename(absolutePathToFile, nodeExtname(absolutePathToFile)); // (filename without extension)
+        const extension_inc_dot = nodeExtname(absolutePathToFile);
 
         return {
             type: 'file',

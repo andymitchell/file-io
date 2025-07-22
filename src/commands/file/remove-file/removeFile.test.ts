@@ -86,7 +86,6 @@ describe('removeFile', () => {
         const directoryPath = mkdtempSync(join(baseTempDir, 'test-directory'));
 
         const result = removeFile(directoryPath);
-        console.log(result);
         expect(result.success).toBe(false);
         expect(result.error).toBeInstanceOf(Error);
     });

@@ -25,7 +25,6 @@ function _removeFile(pathToFile: string):Response {
     const absolutePathToFile = absolute(pathToFile);
     try {
         if (!existsSync(absolutePathToFile)) {
-            console.log("Did not exist: "+absolutePathToFile)
             return {success: true};
         }
 

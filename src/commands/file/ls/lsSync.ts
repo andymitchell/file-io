@@ -8,6 +8,7 @@ import type { PathInfo } from '../path-info/types.ts';
 import { pathInfoSync } from '../path-info/pathInfoSync.ts';
 import { absolute } from '../absolute/absolute.ts';
 import { statSync } from 'fs';
+import { convertUnknownToError } from '../../../utils/convertUnknownToError.ts';
 
 
 
@@ -71,16 +72,7 @@ export function lsSync(pathToDirectory: string, options?: LsOptions, throwError?
 
         return {success: true, contents}
     } catch(e) {
-        let error:Error;
-        if( e instanceof Error ) {
-            error = e;
-        } else {
-            let serializedError:string | undefined;
-            try {
-                serializedError = JSON.stringify(e);
-            } catch(e) {}
-            error = new Error(`Unknown error: ${serializedError ?? 'na'}`);
-        }
+        const error = convertUnknownToError(e);
         
 
         if( throwError ) {

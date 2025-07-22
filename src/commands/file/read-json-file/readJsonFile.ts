@@ -1,6 +1,7 @@
 
-import JSON5 from 'json5';
+import {parse as json5Parse} from 'json5';
 import { readFileSync } from 'node:fs';
+import { absolute } from '../absolute/absolute.ts';
 
 type DefaultObject = Record<string, any>;
 type Options = {vanilla_json?:boolean};
@@ -11,13 +12,13 @@ function missingFileUriReadJson(fileUri:string | undefined, defaultObject?:Defau
 
 type ReadJson = {object:Record<string, any>, file_found:boolean, error?: Error};
 type ReadJsonWithUndefined = {object:Record<string, any> | undefined, file_found:boolean, error?: Error};
-export function readJsonFile(fileUri: string | undefined, defaultObject?:undefined, options?:Options):ReadJsonWithUndefined;
-export function readJsonFile(fileUri: string | undefined, defaultObject:DefaultObject, options?:Options):ReadJson;
+export function readJsonFile(pathToFile: string | undefined, defaultObject?:undefined, options?:Options):ReadJsonWithUndefined;
+export function readJsonFile(pathToFile: string | undefined, defaultObject:DefaultObject, options?:Options):ReadJson;
 /**
  * Reads and parses a JSON (or JSON5) file from disk, returning either the parsed object
  * or a default fallback along with metadata indicating an issue. 
  * 
- * @param fileUri - The path or URI of the file to read. If `undefined` or empty, the function
+ * @param pathToFile - The absolute/relative path of the file to read. If `undefined` or empty, the function
  *                  immediately returns `{ object: defaultObject, file_found: false, error }`.
  * @param defaultObject - An optional object to return if the file is not found or if parsing fails.
  *                        If omitted, `object` will be `undefined` in those cases.
@@ -65,7 +66,8 @@ export function readJsonFile(fileUri: string | undefined, defaultObject:DefaultO
  *   console.error('Strict parsing failed:', strictResult.error);
  * }
  */
-export function readJsonFile(fileUri: string | undefined, defaultObject?:DefaultObject, options?:Options):ReadJsonWithUndefined {
+export function readJsonFile(pathToFile: string | undefined, defaultObject?:DefaultObject, options?:Options):ReadJsonWithUndefined {
+    const fileUri = pathToFile? absolute(pathToFile) : undefined;
     if( !fileUri ) return missingFileUriReadJson(fileUri, defaultObject);
 
     let json: string | undefined;
@@ -80,8 +82,8 @@ export function readJsonFile(fileUri: string | undefined, defaultObject?:Default
 function processJson(fileUri: string, json:string | undefined, defaultObject?:DefaultObject, useVanillaJson?:boolean):ReadJsonWithUndefined {
     if( typeof json==='string' ) {
         try {
-            const jsoner = useVanillaJson? JSON : JSON5;
-            const object = jsoner.parse(json);
+            const parser = useVanillaJson? JSON.parse : json5Parse;
+            const object = parser(json);
             return {object, file_found: true};
         } catch(e) {
             const message = e instanceof Error? e.message : 'na';

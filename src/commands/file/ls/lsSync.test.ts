@@ -143,7 +143,6 @@ describe('lsSync', () => {
             const results = lsSync(tempDir, {type: 'file'})?.contents;
 
             expect(results.length).toBeGreaterThan(0);
-            console.log({results})
             expect(results.every(x => x.type==='file')).toBe(true);
         })
 
@@ -151,7 +150,6 @@ describe('lsSync', () => {
             const results = lsSync(tempDir, {type: 'dir'})?.contents;
 
             expect(results.length).toBeGreaterThan(0);
-            console.log({results})
             expect(results.every(x => x.type==='dir')).toBe(true);
         })
     })

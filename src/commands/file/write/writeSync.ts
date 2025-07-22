@@ -1,6 +1,7 @@
-import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { getErrorMessage } from "../../../utils/getErrorMessage.ts";
+import { absolute } from "../absolute/absolute.ts";
 
 type Options = {
     append?: boolean;
@@ -9,11 +10,13 @@ type Options = {
     appending_separator_only_if_file_exists?: string;
 };
 
+type Response = { success: true; error?: undefined } | { success: false; error: Error };
+
 /**
  * Synchronously writes content to a file, with convenient options for appending,
  * overwriting, and directory creation.
  *
- * @param absolutePath - The absolute path to the file to write.
+ * @param path - The absolute or relative path to the file to write.
  * @param content - The string content to write to the file.
  * @param options - Optional settings:
  *   @param options.append - If `true`, appends `content` to the file instead of overwriting.
@@ -56,12 +59,33 @@ type Options = {
  *
  */
 export function writeSync(
-    absolutePath: string,
+    path: string,
+    content: string,
+    options?: Options,
+    throwError?: boolean
+): Response {
+
+    const response = _writeSync(path, content, options);
+
+    
+    if( response.success===false && throwError ) {
+        throw response.error;
+    } 
+    return response;
+
+}
+
+
+function _writeSync(
+    path: string,
     content: string,
     options?: Options
-): { success: true; error?: undefined } | { success: false; error: Error } {
+): Response {
     try {
+        const absolutePath = absolute(path);
+
         const hasFile = existsSync(absolutePath);
+        if( hasFile && statSync(absolutePath).isDirectory() ) return {success: false, error: new Error('Pointed to a directory')};
 
         if (options?.append) {
             if (hasFile && options?.appending_separator_only_if_file_exists) {
@@ -70,7 +94,7 @@ export function writeSync(
             appendFileSync(absolutePath, content);
         } else {
             if (!options?.overwrite && hasFile) {
-                throw new Error("Cannot overwrite");
+                throw new Error("Cannot overwrite. Need to set 'overwrite' option.");
             }
 
             if (!hasFile && options?.make_directory) {
@@ -87,7 +111,7 @@ export function writeSync(
         return {
             success: false,
             error: new Error(
-                `Cannot write file ${absolutePath}. Error: ${getErrorMessage(e)}`
+                `Cannot write file ${path}. Error: ${getErrorMessage(e)}`
             ),
         };
     }
