@@ -1,8 +1,7 @@
 {
     "name": "@andyrmitchell/file-io",
-    "is_andyrmitchell_file_io_package": true,
     "version": "0.13.0",
-    "description": "Abstraction for working with the file system in any environment (currently only Node)",
+    "description": "Abstraction for working with the file system (currently only Node)",
     "sideEffects": false,
     "exports": {
         ".": {
@@ -23,6 +22,10 @@
     "publishConfig": {
         "access": "public"
     },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/andymitchell/file-io.git"
+    },
     "scripts": {
         "build_release": "npm run build_prepare && np",
         "build": "tsup",
@@ -31,9 +34,9 @@
         "prepublishOnly": "npm run build_prepare",
         "test": "vitest",
         "test:watch": "vitest --watch",
-        "test_cli:user_input": "npx tsup-node --no-config --format esm --entry.test_cli_user_input ./src/user-input/examples/index.ts && node ./dist/test_cli_user_input.mjs && rm ./dist/test_cli_user_input.mjs",
-        "test_cli:spawn_like_exec": "npx tsup-node --no-config --format esm --entry.test_cli_spawn_like_exec ./src/utils/spawnLikeExec.example.ts && node ./dist/test_cli_spawn_like_exec.mjs && rm ./dist/test_cli_spawn_like_exec.mjs",
-        "test_cli:get_calling_directory": "npx tsup-node --no-config --format esm --entry.test_cli_get_calling_directory ./old-test-assets/cli/get-calling-script/index.ts && node ./dist/test_cli_get_calling_directory.mjs && rm ./dist/test_cli_get_calling_directory.mjs"
+        "old:test_cli:user_input": "npx tsup-node --no-config --format esm --entry.test_cli_user_input ./src/user-input/examples/index.ts && node ./dist/test_cli_user_input.mjs && rm ./dist/test_cli_user_input.mjs",
+        "old:test_cli:spawn_like_exec": "npx tsup-node --no-config --format esm --entry.test_cli_spawn_like_exec ./src/utils/spawnLikeExec.example.ts && node ./dist/test_cli_spawn_like_exec.mjs && rm ./dist/test_cli_spawn_like_exec.mjs",
+        "old:test_cli:get_calling_directory": "npx tsup-node --no-config --format esm --entry.test_cli_get_calling_directory ./old-test-assets/cli/get-calling-script/index.ts && node ./dist/test_cli_get_calling_directory.mjs && rm ./dist/test_cli_get_calling_directory.mjs"
     },
     "author": "andymitchell",
     "license": "MIT",

@@ -1,5 +1,6 @@
 import { backupFileSync } from "./commands/file/backup-file/backupFileSync.ts";
 import { copyFileSync } from "./commands/file/copy-file/copyFileSync.ts";
+import { getPackageDirectorySync } from "./commands/file/get-package-directory/getPackageDirectorySync.ts";
 import { lsSync } from "./commands/file/ls/lsSync.ts";
 import { pathInfoSync } from "./commands/file/path-info/pathInfoSync.ts";
 import { readJsonFile } from "./commands/file/read-json-file/readJsonFile.ts";
@@ -24,7 +25,8 @@ export {
     removeFile, 
     stripTrailingSep,
     thisDir, 
-    writeSync
+    writeSync,
+    getPackageDirectorySync
 }
 
 export {

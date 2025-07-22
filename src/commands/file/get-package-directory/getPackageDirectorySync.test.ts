@@ -4,6 +4,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import { pathToFileURL } from 'node:url';
+import { privatifyPath } from '../../../utils/privatifyPath.ts';
 
 // --- Test Setup: Create a realistic temporary file structure ---
 
@@ -71,11 +72,6 @@ afterEach(() => {
 
 
 // --- Test Suites ---
-
-function privatifyPath(path:string):string {
-    return `/private${path}`;
-}
-
 describe('getPackageDirectorySync: CWD Mode (`{type: "cwd"}`)', () => {
     it('should find the root package.json when cwd is the project root', () => {
         process.chdir(projectRootDir);
