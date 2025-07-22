@@ -1,4 +1,4 @@
-import { isAbsolute, resolve } from "path";
+import { isAbsolute, resolve, sep } from "path";
 import { cwd } from "process";
 import { stripTrailingSep } from "../strip-trailing-sep/stripTrailingSep.ts";
 
@@ -15,6 +15,21 @@ import { stripTrailingSep } from "../strip-trailing-sep/stripTrailingSep.ts";
  * absolute("/etc/passwd/");  // -> /etc/passwd
  */
 export function absolute(filePath: string): string {
-    const abs = isAbsolute(filePath) ? filePath : resolve(cwd(), filePath);
-    return stripTrailingSep(abs);
+    return stripTrailingSep(absoluteWithoutStrippingTrailingSep(filePath));
+}
+
+/**
+ * Maintains the ending of the path as is 
+ * @param filePath 
+ * @returns 
+ */
+export function absoluteWithoutStrippingTrailingSep(filePath: string): string {
+    const endsInSep = filePath.endsWith(sep);
+    let path = isAbsolute(filePath) ? filePath : resolve(cwd(), filePath);
+    
+    if( endsInSep && path && !path.endsWith(sep) ) {
+        path += sep;
+    }
+
+    return path;
 }

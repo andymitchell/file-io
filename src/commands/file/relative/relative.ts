@@ -1,15 +1,18 @@
 import { dirname, extname, relative as nodeRelative, sep } from "node:path";
 import { stripTrailingSep } from "../strip-trailing-sep/stripTrailingSep.ts";
 import { existsSync, statSync } from "node:fs";
+import { absoluteWithoutStrippingTrailingSep } from "../absolute/absolute.ts";
 
 /**
  * Returns a relative path from a to b.
  * 
  * It always removes any trailing slash from the returned path. 
  * 
- * @param fromAbsolutePathDirectoryOrFile Can be a directory or file. 
- * @param toAbsolutePathDirectoryOrFile Can be a directory or file. 
- * @param fromIsDir Override the inference of whether fromAbsolutePathDirectoryOrFile is a directory or file (for accurate relative resolution). Only needed very rarely (e.g. for a non-existent file with no extension... i.e. no way to decide).
+ * Unlike Node's inbuilt relative, it correctly handles `from` being a file for convenience.
+ * 
+ * @param from Can be a directory or file, absolute or relative. If relative, resolves to the current working directory (`cwd`).
+ * @param to Can be a directory or file, absolute or relative. If relative, resolves to the current working directory (`cwd`).
+ * @param fromIsDir Override the inference of whether `from` is a directory or file (for accurate relative resolution). Only needed very rarely (e.g. for a non-existent file with no extension... i.e. no way to decide).
  * @returns 
  * 
  * 
@@ -30,8 +33,15 @@ import { existsSync, statSync } from "node:fs";
  * result === '..'
  * 
  */
-export function relative(fromAbsolutePathDirectoryOrFile: string, toAbsolutePathDirectoryOrFile: string, fromIsDir?:boolean) {
+export function relative(from: string, to: string, fromIsDir?:boolean):string {
 
+    const fromAbsolutePathDirectoryOrFile = absoluteWithoutStrippingTrailingSep(from);
+    const toAbsolutePathDirectoryOrFile = absoluteWithoutStrippingTrailingSep(to);
+
+    console.log({
+        fromAbsolutePathDirectoryOrFile,
+        toAbsolutePathDirectoryOrFile
+    })
     
     let isDirectory = false;
     if( typeof fromIsDir==='boolean' ) {

@@ -128,26 +128,62 @@ describe('relative with real file system', () => {
         it('should fail if it cannot infer', () => {
             expect(inferIsDirectory('./path/filenoext')).toBe(undefined)
         })
-        
-    })
-
-    it('verifies jsdoc examples and handles non-existent files', () => {
-
-        
-        expect(relative('usr/path/', 'usr/path')).toBe('.');
-
-        expect(relative('usr/path/', 'usr/path/file.txt')).toBe('./file.txt');
-
-        expect(relative('usr/path/', 'usr/')).toBe('./..');
-        
-
-        expect(relative('usr/path/', 'usr/file.txt')).toBe('../file.txt');
-        
-
-        expect(relative('usr/path/file2.txt', 'usr/file.txt')).toBe('../file.txt')
-        
-
-        expect(relative('usr/path/file2.txt', 'usr/')).toBe('./..');
 
     })
+
+    describe('non-existant files', () => {
+
+        describe('absolute paths', () => {
+            it('returns "." for the same path with and without trailing slash', () => {
+                expect(relative('/usr/path/', '/usr/path')).toBe('.');
+            });
+
+            it('resolves file inside the same directory', () => {
+                expect(relative('/usr/path/', '/usr/path/file.txt')).toBe('./file.txt');
+            });
+
+            it('resolves upward from nested dir to its parent', () => {
+                expect(relative('/usr/path/', '/usr/')).toBe('./..');
+            });
+
+            it('resolves file in sibling directory', () => {
+                expect(relative('/usr/path/', '/usr/file.txt')).toBe('../file.txt');
+            });
+
+            it('resolves from one file path to another file path', () => {
+                expect(relative('/usr/path/file2.txt', '/usr/file.txt')).toBe('../file.txt');
+            });
+
+            it('resolves upward from file to its grandparent', () => {
+                expect(relative('/usr/path/file2.txt', '/usr/')).toBe('./..');
+            });
+        })
+
+        describe('relative paths', () => {
+            it('returns "." for the same path', () => {
+                expect(relative('./path/', './path/')).toBe('.');
+            });
+
+            it('resolves upward from nested dir to its parent', () => {
+                expect(relative('./path/', './')).toBe('./..');
+            });
+
+
+            it('can handle the 2nd parameter not having a trailing slash as long as it can figure out the first', () => {
+                expect(relative('./path/', './path')).toBe('.');
+            });
+
+            describe('error cases', () => {
+                it('cannot figure out without a trailing / on the first path', () => {
+                    expect(() => relative('./path', './path/')).toThrow('not detect');
+                });
+
+                it('can figure out without a trailing / on the first path if given instruction', () => {
+                    expect(relative('./path', './path/', true)).toBe('.')
+                });
+            })
+        })
+        
+    });
+
 });
