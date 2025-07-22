@@ -1,6 +1,6 @@
 {
     "name": "@andyrmitchell/file-io",
-    "version": "0.14.3",
+    "version": "0.14.4",
     "description": "Abstraction for working with the file system (currently only Node)",
     "sideEffects": false,
     "exports": {
