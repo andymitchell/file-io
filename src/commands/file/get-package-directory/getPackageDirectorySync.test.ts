@@ -296,6 +296,7 @@ describe('getPackageDirectorySync: Error Handling and Edge Cases', () => {
         expect(result.error).toBeInstanceOf(Error);
         // Depending on implementation, this could be a ReferenceError or a custom error.
         // We check that it's caught and handled correctly.
+        // @ts-expect-error - Intentionally testing an invalid type
         expect(result.error?.message).toBeDefined();
     });
 });

@@ -12,7 +12,8 @@ import { convertUnknownToError } from '../../../utils/convertUnknownToError.ts';
 
 
 
-type Response = {success: true, contents: PathInfo[], error?: undefined} | {success: false, contents: PathInfo[], error: Error};
+type SuccessResponse = {success: true, contents: PathInfo[], error?: undefined};
+type Response = SuccessResponse | {success: false, contents: PathInfo[], error: Error};
 
 
 /**
@@ -66,6 +67,8 @@ type Response = {success: true, contents: PathInfo[], error?: undefined} | {succ
  *   ignore: ['** /node_modules/**']  // remove space in the glob pattern
  * });
  */
+export function lsSync(pathToDirectory: string, options: LsOptions | undefined, throwError: true):SuccessResponse
+export function lsSync(pathToDirectory: string, options?: LsOptions, throwError?: boolean):Response
 export function lsSync(pathToDirectory: string, options?: LsOptions, throwError?: boolean):Response {
     try {
         const contents = _lsSync(pathToDirectory, options);

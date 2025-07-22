@@ -12,8 +12,6 @@ function missingFileUriReadJson(fileUri:string | undefined, defaultObject?:Defau
 
 type ReadJson = {object:Record<string, any>, file_found:boolean, error?: Error};
 type ReadJsonWithUndefined = {object:Record<string, any> | undefined, file_found:boolean, error?: Error};
-export function readJsonFile(pathToFile: string | undefined, defaultObject?:undefined, options?:Options):ReadJsonWithUndefined;
-export function readJsonFile(pathToFile: string | undefined, defaultObject:DefaultObject, options?:Options):ReadJson;
 /**
  * Reads and parses a JSON (or JSON5) file from disk, returning either the parsed object
  * or a default fallback along with metadata indicating an issue. 
@@ -66,6 +64,8 @@ export function readJsonFile(pathToFile: string | undefined, defaultObject:Defau
  *   console.error('Strict parsing failed:', strictResult.error);
  * }
  */
+export function readJsonFile(pathToFile: string | undefined, defaultObject?:undefined, options?:Options):ReadJsonWithUndefined;
+export function readJsonFile(pathToFile: string | undefined, defaultObject:DefaultObject, options?:Options):ReadJson;
 export function readJsonFile(pathToFile: string | undefined, defaultObject?:DefaultObject, options?:Options):ReadJsonWithUndefined {
     const fileUri = pathToFile? absolute(pathToFile) : undefined;
     if( !fileUri ) return missingFileUriReadJson(fileUri, defaultObject);

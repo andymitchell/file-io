@@ -5,7 +5,8 @@ import { pathInfoSync } from "../path-info/pathInfoSync.ts";
 import type { FileInfo } from "../path-info/types.ts";
 import { absolute } from "../absolute/absolute.ts";
 
-type Response = {success: true, backupAbsoluteFilePath:string, error?: undefined} | {success: false, error: Error, backupAbsoluteFilePath?: undefined}
+type SuccessResponse = {success: true, backupAbsoluteFilePath:string, error?: undefined} ;
+type Response = SuccessResponse| {success: false, error: Error, backupAbsoluteFilePath?: undefined}
 
 /**
  * Creates a backup of the specified file by copying it to a new uniquely named file
@@ -49,7 +50,11 @@ type Response = {success: true, backupAbsoluteFilePath:string, error?: undefined
  * // -> '/logs/app.backup.bak'
  * ```
  */
-export function backupFileSync(filePath:string, getBackupFile: GetBackupName = getBackupFileDefault, throwError?: boolean):Response {
+export function backupFileSync(filePath:string, getBackupFile: GetBackupName | undefined, throwError: true):SuccessResponse;
+export function backupFileSync(filePath:string, getBackupFile?: GetBackupName, throwError?: boolean):Response;
+export function backupFileSync(filePath:string, getBackupFile?: GetBackupName, throwError?: boolean):Response {
+    if( !getBackupFile ) getBackupFile = getBackupFileDefault;
+    
     const response = _backupFileSync(filePath, getBackupFile);
     if( response.success===false && throwError ) {
         throw response.error;

@@ -8,7 +8,8 @@ type Options = {
     overwrite?: boolean
 }
 
-type Response = {success: true, absoluteDestinationFile: string, error?: undefined} | {success: false, absoluteDestinationFile?: undefined, error: Error}
+type SuccessResponse = {success: true, absoluteDestinationFile: string, error?: undefined};
+type Response = SuccessResponse | {success: false, absoluteDestinationFile?: undefined, error: Error}
 
 /**
  * Copies a file to a destination path, which may be a directory or a specific file 
@@ -57,6 +58,8 @@ type Response = {success: true, absoluteDestinationFile: string, error?: undefin
  * }
  * 
  */
+export function copyFileSync(source: string, destination: string, options: Options | undefined, throwError:true):SuccessResponse
+export function copyFileSync(source: string, destination: string, options?: Options, throwError?:boolean):Response
 export function copyFileSync(source: string, destination: string, options?: Options, throwError?:boolean):Response {
     const response = _copyFileSync(source, destination, options);
     if( response.success===false && throwError ) {

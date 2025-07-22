@@ -10,7 +10,8 @@ type Options = {
     appending_separator_only_if_file_exists?: string;
 };
 
-type Response = { success: true; error?: undefined } | { success: false; error: Error };
+type SuccessResponse = { success: true; error?: undefined } ;
+type Response = SuccessResponse| { success: false; error: Error };
 
 /**
  * Synchronously writes content to a file, with convenient options for appending,
@@ -58,12 +59,9 @@ type Response = { success: true; error?: undefined } | { success: false; error: 
  * // => creates '/var/app/data' if missing, then writes file
  *
  */
-export function writeSync(
-    path: string,
-    content: string,
-    options?: Options,
-    throwError?: boolean
-): Response {
+export function writeSync(path: string, content: string, options: Options | undefined, throwError: true): SuccessResponse
+export function writeSync(path: string, content: string, options?: Options, throwError?: boolean): Response
+export function writeSync(path: string, content: string, options?: Options, throwError?: boolean): Response {
 
     const response = _writeSync(path, content, options);
 

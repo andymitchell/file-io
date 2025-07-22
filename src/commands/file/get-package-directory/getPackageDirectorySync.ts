@@ -10,15 +10,17 @@ import { convertUnknownToError } from '../../../utils/convertUnknownToError.ts';
 import { existsSync } from 'fs';
 
 
-type Response = {
-    success: true, 
+type SuccessResponse = {
+    success: true,
     /**
      * The absolute path to the package.json file
      */
     packageJsonPath: string,
 
     error?: undefined
-} | {
+}
+
+type Response = SuccessResponse | {
     success: false, 
     packageJsonPath?:undefined, 
     error: Error
@@ -91,7 +93,9 @@ type InOrUpFrom = {
  * // Throw if package.json is not found
  * const path = getPackageDirectorySync('cwd', true).packageJsonPath;
  */
-export function getPackageDirectorySync(inOrUpFrom?: InOrUpFrom, throwError?: boolean):Response {
+export function getPackageDirectorySync(inOrUpFrom: InOrUpFrom | undefined, throwError: true): SuccessResponse;
+export function getPackageDirectorySync(inOrUpFrom?: InOrUpFrom, throwError?: boolean): Response;
+export function getPackageDirectorySync(inOrUpFrom?: InOrUpFrom, throwError?: boolean): Response {
     const response = _getPackageDirectorySync(inOrUpFrom);
 
     if( response.success===false && throwError ) {

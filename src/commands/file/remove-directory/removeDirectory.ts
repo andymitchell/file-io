@@ -3,7 +3,8 @@ import { readdirSync } from "node:fs";
 import { getErrorMessage } from "../../../utils/getErrorMessage.ts";
 import { absolute } from "../absolute/absolute.ts";
 
-type Response = { success: true, error?: undefined } | { success: false, error: Error };
+type SuccessResponse = { success: true, error?: undefined } ;
+type Response = SuccessResponse | { success: false, error: Error };
 
 /**
  * Recursively removes a directory at the given absolute path.
@@ -41,6 +42,8 @@ type Response = { success: true, error?: undefined } | { success: false, error: 
  * const result4 = removeDirectory("/root/protected", true);
  * // result4 === { success: false, error: Error("Cannot remove directory /root/protected. Error: <details>") }
  */
+export function removeDirectory(pathToDirectory: string, force: boolean | undefined, throwError:true): SuccessResponse
+export function removeDirectory(pathToDirectory: string, force?: boolean, throwError?:boolean): Response
 export function removeDirectory(pathToDirectory: string, force = false, throwError = false): Response {
     const response = _removeDirectory(pathToDirectory, force);
 

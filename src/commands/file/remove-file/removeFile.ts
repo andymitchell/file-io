@@ -2,7 +2,8 @@ import { existsSync, rmSync, statSync } from "node:fs";
 import { getErrorMessage } from "../../../utils/getErrorMessage.ts";
 import { absolute } from "../absolute/absolute.ts";
 
-type Response = {success: true, error?: undefined} | {success: false, error:Error};
+type SuccessResponse = {success: true, error?: undefined};
+type Response = SuccessResponse | {success: false, error:Error};
 
 /**
  * Like rmSync, but it won't complain if the file doesn't exist 
@@ -11,6 +12,8 @@ type Response = {success: true, error?: undefined} | {success: false, error:Erro
  * @param throwError 
  * @returns 
  */
+export function removeFile(pathToFile: string, throwError:true):SuccessResponse
+export function removeFile(pathToFile: string, throwError?:boolean):Response
 export function removeFile(pathToFile: string, throwError?:boolean):Response {
     const response = _removeFile(pathToFile);
 
