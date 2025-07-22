@@ -38,10 +38,6 @@ export function relative(from: string, to: string, fromIsDir?:boolean):string {
     const fromAbsolutePathDirectoryOrFile = absoluteWithoutStrippingTrailingSep(from);
     const toAbsolutePathDirectoryOrFile = absoluteWithoutStrippingTrailingSep(to);
 
-    console.log({
-        fromAbsolutePathDirectoryOrFile,
-        toAbsolutePathDirectoryOrFile
-    })
     
     let isDirectory = false;
     if( typeof fromIsDir==='boolean' ) {
