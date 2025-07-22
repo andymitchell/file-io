@@ -1,11 +1,32 @@
 import { existsSync, rmSync } from "node:fs";
 import { getErrorMessage } from "../../../utils/getErrorMessage.ts";
 
-export function removeFile(absolutePathToFile: string) {
+type Response = {success: true, error?: undefined} | {success: false, error:Error};
+
+/**
+ * Like rmSync, but it won't complain if the file doesn't exist 
+ * 
+ * @param absolutePathToFile 
+ * @param throwError 
+ * @returns 
+ */
+export function removeFile(absolutePathToFile: string, throwError?:boolean):Response {
+    const response = _removeFile(absolutePathToFile);
+
+    if( response.success===false && throwError ) {
+        throw response.error;
+    }
+
+    return response;
+}
+
+function _removeFile(absolutePathToFile: string):Response {
     try {
-        if (!existsSync(absolutePathToFile)) return;
+        if (!existsSync(absolutePathToFile)) return {success: true};
         rmSync(absolutePathToFile);
+        return {success: true};
     } catch (e) {
-        throw new Error(`Cannot remove file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);
+        const error = new Error(`Cannot remove file ${absolutePathToFile}. Error: ${getErrorMessage(e)}`);
+        return {success: false, error};
     }
 }

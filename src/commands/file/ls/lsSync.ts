@@ -107,7 +107,6 @@ export function lsSync(absolutePathDirectory: string, options?: LsOptions):PathI
         };
 
 
-        console.log({globOptions})
         // In the failing test, this is: {cwd: '/var/folders/wn/m1t3t49j2ts2brb2g5jn02q40000gn/T/vitest-glob-test-3tEB1j', nodir: true, follow: false, absolute: true}
         // Note 'absolute' makes no different to how it behaves 
 
@@ -121,7 +120,6 @@ export function lsSync(absolutePathDirectory: string, options?: LsOptions):PathI
         let filePaths = globSync(pattern, globOptions) as string[];
         if( filePaths[0] && typeof filePaths[0]!=='string' ) throw new Error("Expected strings");
         
-        console.log({filePaths})
 
         // If a file_pattern is a RegExp, filter the results post-glob.
         const filePatternRegExp = safeOptions.file_pattern;
@@ -137,7 +135,7 @@ export function lsSync(absolutePathDirectory: string, options?: LsOptions):PathI
         const results = filePaths.map(filePath => {
             // Ensure filePath is a string before passing to path functions.
             const pathStr = filePath.toString();
-            return pathInfoSync(pathStr)
+            return pathInfoSync(pathStr, true)
         });
 
         if( safeOptions.type==='file' ) {

@@ -3,8 +3,9 @@ import { existsSync } from "node:fs";
 import { copyFileSync } from "../copy-file/copyFileSync.ts";
 import { pathInfoSync } from "../path-info/pathInfoSync.ts";
 import type { FileInfo } from "../path-info/types.ts";
+import { absolute } from "../absolute/absolute.ts";
 
-
+type Response = {success: true, backupAbsoluteFilePath:string, error?: undefined} | {success: false, error: Error, backupAbsoluteFilePath?: undefined}
 
 /**
  * Creates a backup of the specified file by copying it to a new uniquely named file
@@ -31,7 +32,7 @@ import type { FileInfo } from "../path-info/types.ts";
  * 
  * @example
  * ```ts
- * const uri = backupFileSync('/data/config.json');
+ * const uri = backupFileSync('/data/config.json')?.backupAbsoluteFilePath;
  * console.log(uri); 
  * // -> '/data/config_20250722083015432-0.bak' (or next available slot)
  * // the slot (0 here) increments if another backup exists at the same millisecond
@@ -43,28 +44,41 @@ import type { FileInfo } from "../path-info/types.ts";
  * const uri = backupFileSync('/logs/app.log', ({ name, dirname }) => {
  *   const file = `${name}.backup.bak`;
  *   return { uri: `${dirname}/${file}`, file };
- * });
+ * })?.backupAbsoluteFilePath;
  * console.log(uri); 
  * // -> '/logs/app.backup.bak'
  * ```
  */
-export function backupFileSync(absoluteFileUri:string, getBackupFile: GetBackupName = getBackupFileDefault):string | undefined {
-    if( !existsSync(absoluteFileUri) ) return undefined;
+export function backupFileSync(filePath:string, getBackupFile: GetBackupName = getBackupFileDefault, throwError?: boolean):Response {
+    const response = _backupFileSync(filePath, getBackupFile);
+    if( response.success===false && throwError ) {
+        throw response.error;
+    } 
+    return response;
+}
+
+function _backupFileSync(filePath:string, getBackupFile: GetBackupName = getBackupFileDefault):Response {
+    const absoluteFileUri = absolute(filePath);
+    if( !existsSync(absoluteFileUri) ) {
+        return {success: false, error: new Error(`The provided file ${absoluteFileUri} did not exist.`)};
+    }
 
 
-    const filePath = pathInfoSync(absoluteFileUri);
-    if( filePath.type==='dir' ) throw new Error("Only supports files");
+    const fileInfo = pathInfoSync(absoluteFileUri, true);
+    if( fileInfo.type==='dir' ) {
+        return {success: false, error: new Error("Only supports files")};
+    }
 
-    const backupDetails = getBackupFile(filePath);
+    const backupDetails = getBackupFile(fileInfo);
 
     
     if( !backupDetails.uri || existsSync(backupDetails.uri) ) {
-        throw new Error("Bad backup uri: All back up names are taken. Could not complete the operation.");
+        return {success: false, error: new Error("Bad backup uri: All back up names are taken. Could not complete the operation.")};
     } 
 
     const result = copyFileSync(absoluteFileUri, backupDetails.uri);
     if( result.error ) throw result.error;
-    return backupDetails.uri;
+    return {success: true, backupAbsoluteFilePath: backupDetails.uri};
 
 }
 

@@ -2,10 +2,11 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import fs from 'node:fs';
-import path from 'node:path';
+import path, { join } from 'node:path';
 import os from 'node:os';
 import { pathInfoSync } from './pathInfoSync.ts';
 import type { FileInfo, DirectoryInfo } from './types.ts';
+import { cwd } from 'node:process';
 
 // Create a unique temporary directory for this test run
 const testDir = path.join(os.tmpdir(), `pathInfoSync-test-${Date.now()}`);
@@ -157,23 +158,24 @@ describe('pathInfoSync', () => {
                 process.chdir(originalCwd); // Change back to original CWD
             });
 
-            it('should handle relative paths correctly to cover the dirname === "." case', () => {
-                // Passing a relative path, which path.dirname() will resolve to '.'
+            it('should handle relative paths correctly ', () => {
+                // Passing a relative path, will still resolve to absolutes
                 const result = pathInfoSync('file.txt') as FileInfo;
 
                 expect(result.type).toBe('file');
                 expect(result.basename).toBe('file.txt');
-                expect(result.dirname).toBe(''); // dirname becomes '' as per the function logic
+                expect(result.dirname).toBe(cwd()); 
                 expect(result.name).toBe('file');
-                expect(result.uri).toBe('file.txt'); // uri is constructed without a leading path
+                expect(result.uri).toBe(join(cwd(), 'file.txt')); 
             });
         })
 
         it('will handle something with no extension', () => {
             const filePath = path.join(testDir, 'no-extension');
+
             const result = pathInfoSync(filePath) as FileInfo;
 
-            console.log({result})
+            
             expect(result.type).toBe('file');
             expect(result.basename).toBe('no-extension');
             expect(result.extension).toBe('');

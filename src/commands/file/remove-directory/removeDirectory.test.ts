@@ -5,6 +5,8 @@ import { mkdirSync, writeFileSync, existsSync, rmdirSync, symlinkSync } from 'no
 import { join } from 'node:path';
 import { removeDirectory } from './removeDirectory.ts';
 import { tmpdir } from 'node:os';
+import { relative } from '../relative/relative.ts';
+import { cwd } from 'node:process';
 
 // Helper function to create a temporary directory for tests
 const createTestDir = (testName: string) => {
@@ -80,7 +82,16 @@ describe('removeDirectory', () => {
         });
     })
 
-    describe('error handling', () => {
+    describe('edge handling', () => {
+
+        it('handles relative paths', () => {
+            expect(existsSync(testDir)).toBe(true);
+            const pathToTestDir = relative(cwd(), testDir);
+            const result = removeDirectory(pathToTestDir, true);
+            expect(result.success).toBe(true);
+            expect(existsSync(testDir)).toBe(false);
+        })
+
         it('should return success if the directory does not exist', () => {
             const nonExistentDir = join(testDir, 'nonExistent');
             const result = removeDirectory(nonExistentDir);

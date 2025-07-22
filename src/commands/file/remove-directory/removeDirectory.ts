@@ -1,19 +1,21 @@
 import { existsSync, rmSync } from "node:fs";
 import { readdirSync } from "node:fs";
 import { getErrorMessage } from "../../../utils/getErrorMessage.ts";
+import { absolute } from "../absolute/absolute.ts";
+
+type Response = { success: true, error?: undefined } | { success: false, error: Error };
 
 /**
  * Recursively removes a directory at the given absolute path.
  * 
- * By default, this function will **not** delete the directory if it contains anything.
- *
  * - If the directory does not exist, this is treated as a successful no-op.
  * - If the directory is not empty and `force` is not `true`, deletion is skipped and an error is returned.
  * - Otherwise, attempts to delete the directory and all its contents, retrying up to 3 times on failure.
  * - If the directory contains symlinks, and `force` is `true`, the link will be deleted but the linked directory remains 
  *
- * @param absolutePathToDirectory - The absolute filesystem path of the directory to remove.
+ * @param pathToDirectory - A path to the directory to delete. If relative, it'll be resolved from `cwd`.
  * @param force - If `true`, deletes non-empty directories; otherwise, skips deletion on non-empty directories.
+ * @param throwError - If `true` it will throw the error rather than return it
  * @returns An object with:
  *   - `success: true` if the directory was removed (or did not exist),
  *   - `success: false` and an `Error` if deletion was skipped or failed.
@@ -39,23 +41,34 @@ import { getErrorMessage } from "../../../utils/getErrorMessage.ts";
  * const result4 = removeDirectory("/root/protected", true);
  * // result4 === { success: false, error: Error("Cannot remove directory /root/protected. Error: <details>") }
  */
-export function removeDirectory(absolutePathToDirectory: string, force?: boolean): { success: true, error?: undefined } | { success: false, error: Error } {
+export function removeDirectory(pathToDirectory: string, force = false, throwError = false): Response {
+    const response = _removeDirectory(pathToDirectory, force);
+
+    if( throwError && response.success===false ) {
+        throw response.error;
+    }
+    return response;
+}
+
+function _removeDirectory(pathToDirectory: string, force = false): Response {
     try {
-        if (!existsSync(absolutePathToDirectory)) {
+        pathToDirectory = absolute(pathToDirectory);
+        if (!existsSync(pathToDirectory)) {
             return { success: true };
         }
 
-        const dirContents = readdirSync(absolutePathToDirectory);
+        const dirContents = readdirSync(pathToDirectory);
         if (dirContents.length > 0 && !force) {
             return {
                 success: false,
-                error: new Error(`Directory ${absolutePathToDirectory} is not empty. Skipping deletion.`, { cause: { reason: 'directory_not_empty' } })
+                error: new Error(`Directory ${pathToDirectory} is not empty. Skipping deletion.`, { cause: { reason: 'directory_not_empty' } })
             };
         }
 
-        rmSync(absolutePathToDirectory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+        rmSync(pathToDirectory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
         return { success: true };
     } catch (e) {
-        return { success: false, error: new Error(`Cannot remove directory ${absolutePathToDirectory}. Error: ${getErrorMessage(e)}`) };
+        return { success: false, error: new Error(`Cannot remove directory ${pathToDirectory}. Error: ${getErrorMessage(e)}`) };
     }
+
 }

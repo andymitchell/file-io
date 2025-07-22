@@ -62,7 +62,7 @@ export function copyFileSync(source: string, destination: string, options?: Opti
 
         let isDestDirectory = false;
         if (existsSync(destination)) {
-            const info = pathInfoSync(destination);
+            const info = pathInfoSync(destination, true);
             isDestDirectory = info.type==='dir';
         } else if (destination.endsWith(path.sep) || destination.endsWith('/')) {
             isDestDirectory = true;

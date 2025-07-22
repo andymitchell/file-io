@@ -6,7 +6,7 @@ import { readJsonFile } from "./commands/file/read-json-file/readJsonFile.ts";
 import { relative } from "./commands/file/relative/relative.ts";
 import { removeDirectory } from "./commands/file/remove-directory/removeDirectory.ts";
 import { removeFile } from "./commands/file/remove-file/removeFile.ts";
-import { stripTrailingSlash } from "./commands/file/strip-trailing-slash/stripTrailingSlash.ts";
+import { stripTrailingSlash } from "./commands/file/strip-trailing-sep/stripTrailingSep.ts";
 import { thisDir } from "./commands/file/this-dir/thisDir.ts";
 import { writeSync } from "./commands/file/write/writeSync.ts";
 import { execute } from "./commands/terminal/execute/execute.ts";

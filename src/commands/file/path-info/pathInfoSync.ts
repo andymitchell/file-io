@@ -1,7 +1,8 @@
 import path from "node:path";
-import fs from "node:fs";
-import { stripTrailingSlash } from "../strip-trailing-slash/stripTrailingSlash.ts";
+import {existsSync, statSync} from "node:fs";
+import { stripTrailingSep } from "../strip-trailing-sep/stripTrailingSep.ts";
 import type { PathInfo } from "./types.ts";
+import { absolute } from "../absolute/absolute.ts";
 
 /**
  * Retrieve detailed information about a file or directory at the given absolute path.
@@ -55,31 +56,47 @@ import type { PathInfo } from "./types.ts";
  * // }
  * ```
  */
-export function pathInfoSync(absolutePathToFile: string): PathInfo {
-    const stats = fs.statSync(absolutePathToFile);
+export function pathInfoSync(pathToFile: string, throwError:true): PathInfo;
+export function pathInfoSync(pathToFile: string, throwError?:boolean): PathInfo | undefined;
+export function pathInfoSync(pathToFile: string, throwError?:boolean): PathInfo | undefined {
+    try {
+        const absolutePathToFile = absolute(pathToFile);
 
-    if (stats.isDirectory()) {
-        const dirname = stripTrailingSlash(absolutePathToFile);
+        if( !existsSync(absolutePathToFile) ) {
+            throw new Error(`Could not find ${absolutePathToFile}`);
+        }
+
+        const stats = statSync(absolutePathToFile);
+
+        if (stats.isDirectory()) {
+            const dirname = stripTrailingSep(absolutePathToFile);
+            return {
+                type: 'dir',
+                dirname,
+                uri: dirname
+            };
+        }
+
+        let dirname = stripTrailingSep(path.dirname(absolutePathToFile));
+        if (dirname === '.') dirname = '';
+        const basename = path.basename(absolutePathToFile);
+        const name = path.basename(absolutePathToFile, path.extname(absolutePathToFile)); // (filename without extension)
+        const extension_inc_dot = path.extname(absolutePathToFile);
+
         return {
-            type: 'dir',
-            dirname,
-            uri: dirname
+            type: 'file',
+            basename,
+            extension: extension_inc_dot.replace(/^\./, ''),
+            extension_inc_dot,
+            name,
+            dirname: dirname,
+            uri: `${dirname ? `${dirname}/` : ''}${basename}`
         };
+    }catch(e) {
+        if( throwError ) {
+            throw e;
+        } else {
+            return undefined;
+        }
     }
-
-    let dirname = stripTrailingSlash(path.dirname(absolutePathToFile));
-    if (dirname === '.') dirname = '';
-    const basename = path.basename(absolutePathToFile);
-    const name = path.basename(absolutePathToFile, path.extname(absolutePathToFile)); // (filename without extension)
-    const extension_inc_dot = path.extname(absolutePathToFile);
-
-    return {
-        type: 'file',
-        basename,
-        extension: extension_inc_dot.replace(/^\./, ''),
-        extension_inc_dot,
-        name,
-        dirname: dirname,
-        uri: `${dirname ? `${dirname}/` : ''}${basename}`
-    };
 }

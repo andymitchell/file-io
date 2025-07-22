@@ -39,7 +39,7 @@ describe('backupFileSync', () => {
 
     test('should return undefined if the source file does not exist', () => {
         const filePath = path.join(testDir, 'non-existent-file.txt');
-        const backupUri = backupFileSync(filePath);
+        const backupUri = backupFileSync(filePath)?.backupAbsoluteFilePath;
         expect(backupUri).toBeUndefined();
     });
 
@@ -69,7 +69,7 @@ describe('backupFileSync', () => {
         const content = 'Hello, Vitest!';
         writeFileSync(filePath, content);
 
-        const backupUri = backupFileSync(filePath);
+        const backupUri = backupFileSync(filePath)?.backupAbsoluteFilePath;
 
         expect(backupUri).toBeDefined();
         expect(backupUri).not.toBe(filePath);
@@ -88,10 +88,10 @@ describe('backupFileSync', () => {
         const content = 'Hello, again!';
         writeFileSync(filePath, content);
 
-        const backupUri1 = backupFileSync(filePath);
+        const backupUri1 = backupFileSync(filePath)?.backupAbsoluteFilePath;
         // Ensure a different timestamp for the next backup
         await new Promise(resolve => setTimeout(resolve, 10)); 
-        const backupUri2 = backupFileSync(filePath);
+        const backupUri2 = backupFileSync(filePath)?.backupAbsoluteFilePath;
 
         expect(backupUri1).toBeDefined();
         expect(backupUri2).toBeDefined();
@@ -119,7 +119,7 @@ describe('backupFileSync', () => {
             };
         };
 
-        const backupUri = backupFileSync(filePath, getCustomBackupFile);
+        const backupUri = backupFileSync(filePath, getCustomBackupFile)?.backupAbsoluteFilePath;
 
         expect(backupUri).toBeDefined();
         expect(path.basename(backupUri!)).toBe(customBackupName);
@@ -134,7 +134,7 @@ describe('backupFileSync', () => {
         writeFileSync(filePath, content);
 
         // Pre-create files to block all possible backup names from the default generator
-        const d = pathInfoSync(filePath);
+        const d = pathInfoSync(filePath, true);
         if( d.type!=='file' ) throw new Error("Could not prove d was a file");
         const dateStr = '20250101010'; // A fixed date string for predictability
         for (let i = 0; i < 10; i++) {
@@ -155,7 +155,7 @@ describe('backupFileSync', () => {
                 return { uri, file };
             };
             
-            backupFileSync(filePath, clashingBackupNamer);
+            backupFileSync(filePath, clashingBackupNamer, true);
         };
         
         // This test will fail if the loop limit (10) is not reached.

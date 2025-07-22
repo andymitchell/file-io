@@ -1,9 +1,11 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
-import { stripTrailingSlash } from "../strip-trailing-slash/stripTrailingSlash.ts";
+import { stripTrailingSep } from "../strip-trailing-sep/stripTrailingSep.ts";
 
 /**
  * Retrieve the curent script's directory
+ * 
+ * It's equivalent to `stripTrailingSep(dirname(fileURLToPath(import.meta.url)))`
  * 
  * @param esmUrl The result of `import.meta.url` from your script 
  * @returns Normalised (no trailing slash) directory
@@ -12,5 +14,5 @@ import { stripTrailingSlash } from "../strip-trailing-slash/stripTrailingSlash.t
  * const __dirname = thisDir(import.meta.url)
  */
 export function thisDir(esmUrl:string):string {
-    return stripTrailingSlash(dirname(fileURLToPath(esmUrl)));
+    return stripTrailingSep(dirname(fileURLToPath(esmUrl)));
 }
