@@ -1,5 +1,5 @@
 
-import {parse as json5Parse} from 'json5';
+import JSON5 from 'json5';
 import { readFileSync } from 'node:fs';
 import { absolute } from '../absolute/absolute.ts';
 
@@ -82,7 +82,7 @@ export function readJsonFile(pathToFile: string | undefined, defaultObject?:Defa
 function processJson(fileUri: string, json:string | undefined, defaultObject?:DefaultObject, useVanillaJson?:boolean):ReadJsonWithUndefined {
     if( typeof json==='string' ) {
         try {
-            const parser = useVanillaJson? JSON.parse : json5Parse;
+            const parser = useVanillaJson? JSON.parse : JSON5.parse;
             const object = parser(json);
             return {object, file_found: true};
         } catch(e) {
