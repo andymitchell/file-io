@@ -23,29 +23,29 @@ type Response = SuccessResponse | { success: false, error: Error };
  *
  * @example
  * // Directory does not exist → success
- * const result1 = removeDirectory("/tmp/nonexistent");
+ * const result1 = removeDirectorySync("/tmp/nonexistent");
  * // result1 === { success: true }
  *
  * @example
  * // Directory exists but is not empty, without force → error
  * // (error.cause.reason === 'directory_not_empty')
- * const result2 = removeDirectory("/tmp/my-data");
+ * const result2 = removeDirectorySync("/tmp/my-data");
  * // result2 === { success: false, error: Error("Directory /tmp/my-data is not empty. Skipping deletion.") }
  *
  * @example
  * // Directory exists and force deletion of contents
- * const result3 = removeDirectory("/tmp/my-data", true);
+ * const result3 = removeDirectorySync("/tmp/my-data", true);
  * // result3 === { success: true }
  *
  * @example
  * // Unexpected failure (e.g., permissions) → error with underlying message
- * const result4 = removeDirectory("/root/protected", true);
+ * const result4 = removeDirectorySync("/root/protected", true);
  * // result4 === { success: false, error: Error("Cannot remove directory /root/protected. Error: <details>") }
  */
-export function removeDirectory(pathToDirectory: string, force: boolean | undefined, throwError:true): SuccessResponse
-export function removeDirectory(pathToDirectory: string, force?: boolean, throwError?:boolean): Response
-export function removeDirectory(pathToDirectory: string, force = false, throwError = false): Response {
-    const response = _removeDirectory(pathToDirectory, force);
+export function removeDirectorySync(pathToDirectory: string, force: boolean | undefined, throwError:true): SuccessResponse
+export function removeDirectorySync(pathToDirectory: string, force?: boolean, throwError?:boolean): Response
+export function removeDirectorySync(pathToDirectory: string, force = false, throwError = false): Response {
+    const response = _removeDirectorySync(pathToDirectory, force);
 
     if( throwError && response.success===false ) {
         throw response.error;
@@ -53,7 +53,7 @@ export function removeDirectory(pathToDirectory: string, force = false, throwErr
     return response;
 }
 
-function _removeDirectory(pathToDirectory: string, force = false): Response {
+function _removeDirectorySync(pathToDirectory: string, force = false): Response {
     try {
         pathToDirectory = absolute(pathToDirectory);
         if (!existsSync(pathToDirectory)) {

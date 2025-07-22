@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { removeFile } from './removeFile.ts';
+import { removeFileSync } from './removeFileSync.ts';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { mkdtempSync, writeFileSync, rmSync, chmodSync, existsSync, mkdirSync } from 'node:fs';
 
 // Create a temporary directory for our tests
 
-const baseTempDir = mkdtempSync(join(tmpdir(), 'vitest-removefile-'));
+const baseTempDir = mkdtempSync(join(tmpdir(), 'vitest-removeFileSync-'));
 
 // Cleanup the temporary directory after all tests have run
 beforeAll(() => {
@@ -17,13 +17,13 @@ afterAll(() => {
     rmSync(baseTempDir, { recursive: true, force: true });
 });
 
-describe('removeFile', () => {
+describe('removeFileSync', () => {
 
     it('should successfully remove an existing file and return success', () => {
         const filePath = join(baseTempDir, 'test-file-to-remove.txt');
         writeFileSync(filePath, 'test content');
 
-        const result = removeFile(filePath);
+        const result = removeFileSync(filePath);
 
         expect(result.success).toBe(true);
         expect(result.error).toBeUndefined();
@@ -32,7 +32,7 @@ describe('removeFile', () => {
 
     it('should return success if the file does not exist', () => {
         const nonExistentFilePath = join(baseTempDir, 'non-existent-file.txt');
-        const result = removeFile(nonExistentFilePath);
+        const result = removeFileSync(nonExistentFilePath);
 
         expect(result.success).toBe(true);
         expect(result.error).toBeUndefined();
@@ -49,7 +49,7 @@ describe('removeFile', () => {
         // Make the PARENT DIRECTORY read-only
         chmodSync(permTestDir, 0o555); // Read & Execute permissions
 
-        const result = removeFile(filePath);
+        const result = removeFileSync(filePath);
 
         expect(result.success).toBe(false);
         expect(result.error).toBeInstanceOf(Error);
@@ -69,7 +69,7 @@ describe('removeFile', () => {
         // Make the PARENT DIRECTORY read-only
         chmodSync(permTestDir, 0o555);
 
-        expect(() => removeFile(filePath, true)).toThrow();
+        expect(() => removeFileSync(filePath, true)).toThrow();
 
         // Cleanup
         chmodSync(permTestDir, 0o755);
@@ -77,7 +77,7 @@ describe('removeFile', () => {
     });
 
     it('should return an error for an empty string path', () => {
-        const result = removeFile('');
+        const result = removeFileSync('');
         expect(result.success).toBe(false);
         expect(result.error).toBeInstanceOf(Error);
     });
@@ -85,7 +85,7 @@ describe('removeFile', () => {
     it('should return an error when the path is a directory', () => {
         const directoryPath = mkdtempSync(join(baseTempDir, 'test-directory'));
 
-        const result = removeFile(directoryPath);
+        const result = removeFileSync(directoryPath);
         expect(result.success).toBe(false);
         expect(result.error).toBeInstanceOf(Error);
     });

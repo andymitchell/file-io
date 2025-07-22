@@ -5,8 +5,8 @@ import { lsSync } from "./commands/file/ls/lsSync.ts";
 import { pathInfoSync } from "./commands/file/path-info/pathInfoSync.ts";
 import { readJsonFile } from "./commands/file/read-json-file/readJsonFile.ts";
 import { relative } from "./commands/file/relative/relative.ts";
-import { removeDirectory } from "./commands/file/remove-directory/removeDirectory.ts";
-import { removeFile } from "./commands/file/remove-file/removeFile.ts";
+import { removeDirectorySync } from "./commands/file/remove-directory/removeDirectorySync.ts";
+import { removeFileSync } from "./commands/file/remove-file/removeFileSync.ts";
 import { stripTrailingSep } from "./commands/file/strip-trailing-sep/stripTrailingSep.ts";
 import { thisDir } from "./commands/file/this-dir/thisDir.ts";
 import { writeSync } from "./commands/file/write/writeSync.ts";
@@ -21,8 +21,8 @@ export {
     pathInfoSync,
     readJsonFile,
     relative,
-    removeDirectory,
-    removeFile, 
+    removeDirectorySync,
+    removeFileSync, 
     stripTrailingSep,
     thisDir, 
     writeSync,

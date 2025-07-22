@@ -3,7 +3,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, writeFileSync, existsSync, rmdirSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
-import { removeDirectory } from './removeDirectory.ts';
+import { removeDirectorySync } from './removeDirectorySync.ts';
 import { tmpdir } from 'node:os';
 import { relative } from '../relative/relative.ts';
 import { cwd } from 'node:process';
@@ -20,11 +20,11 @@ const createTestDir = (testName: string) => {
     return tmpDir;
 };
 
-describe('removeDirectory', () => {
+describe('removeDirectorySync', () => {
     let testDir: string;
 
     beforeEach(() => {
-        testDir = createTestDir('removeDirectoryTest');
+        testDir = createTestDir('removeDirectorySyncTest');
     });
 
     afterEach(() => {
@@ -38,7 +38,7 @@ describe('removeDirectory', () => {
         const dirToRemove = join(testDir, 'emptyDir');
         mkdirSync(dirToRemove);
 
-        const result = removeDirectory(dirToRemove);
+        const result = removeDirectorySync(dirToRemove);
 
         expect(result.success).toBe(true);
         expect(existsSync(dirToRemove)).toBe(false);
@@ -50,7 +50,7 @@ describe('removeDirectory', () => {
             mkdirSync(dirToRemove);
             writeFileSync(join(dirToRemove, 'file.txt'), 'hello');
 
-            const result = removeDirectory(dirToRemove, true);
+            const result = removeDirectorySync(dirToRemove, true);
 
             expect(result.success).toBe(true);
             expect(existsSync(dirToRemove)).toBe(false);
@@ -61,7 +61,7 @@ describe('removeDirectory', () => {
             mkdirSync(dirToRemove);
             writeFileSync(join(dirToRemove, 'file.txt'), 'hello');
 
-            const result = removeDirectory(dirToRemove);
+            const result = removeDirectorySync(dirToRemove);
 
             expect(result.success).toBe(false);
             expect(result.error).toBeInstanceOf(Error);
@@ -76,7 +76,7 @@ describe('removeDirectory', () => {
             mkdirSync(childDir, { recursive: true });
             writeFileSync(join(childDir, 'file.txt'), 'nested file');
 
-            const result = removeDirectory(parentDir, true);
+            const result = removeDirectorySync(parentDir, true);
             expect(result.success).toBe(true);
             expect(existsSync(parentDir)).toBe(false);
         });
@@ -87,14 +87,14 @@ describe('removeDirectory', () => {
         it('handles relative paths', () => {
             expect(existsSync(testDir)).toBe(true);
             const pathToTestDir = relative(cwd(), testDir);
-            const result = removeDirectory(pathToTestDir, true);
+            const result = removeDirectorySync(pathToTestDir, true);
             expect(result.success).toBe(true);
             expect(existsSync(testDir)).toBe(false);
         })
 
         it('should return success if the directory does not exist', () => {
             const nonExistentDir = join(testDir, 'nonExistent');
-            const result = removeDirectory(nonExistentDir);
+            const result = removeDirectorySync(nonExistentDir);
             expect(result.success).toBe(true);
         });
 
@@ -103,7 +103,7 @@ describe('removeDirectory', () => {
             const fileAsDir = join(testDir, 'fileAsDir.txt');
             writeFileSync(fileAsDir, 'I am a file');
 
-            const result = removeDirectory(fileAsDir);
+            const result = removeDirectorySync(fileAsDir);
 
             expect(result.success).toBe(false);
             expect(result.error).toBeInstanceOf(Error);
@@ -122,7 +122,7 @@ describe('removeDirectory', () => {
             const symlinkPath = join(dirToRemove, 'theSymlink');
             symlinkSync(symlinkTarget, symlinkPath, 'dir');
 
-            const result = removeDirectory(dirToRemove, false);
+            const result = removeDirectorySync(dirToRemove, false);
 
             expect(result.success).toBe(false);
             expect(result.error).toBeInstanceOf(Error);
@@ -141,7 +141,7 @@ describe('removeDirectory', () => {
             const symlinkPath = join(dirToRemove, 'theSymlink');
             symlinkSync(symlinkTarget, symlinkPath, 'dir');
 
-            const result = removeDirectory(dirToRemove, true);
+            const result = removeDirectorySync(dirToRemove, true);
 
             expect(result.success).toBe(true);
             expect(existsSync(dirToRemove)).toBe(false);

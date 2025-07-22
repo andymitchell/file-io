@@ -12,10 +12,10 @@ type Response = SuccessResponse | {success: false, error:Error};
  * @param throwError 
  * @returns 
  */
-export function removeFile(pathToFile: string, throwError:true):SuccessResponse
-export function removeFile(pathToFile: string, throwError?:boolean):Response
-export function removeFile(pathToFile: string, throwError?:boolean):Response {
-    const response = _removeFile(pathToFile);
+export function removeFileSync(pathToFile: string, throwError:true):SuccessResponse
+export function removeFileSync(pathToFile: string, throwError?:boolean):Response
+export function removeFileSync(pathToFile: string, throwError?:boolean):Response {
+    const response = _removeFileSync(pathToFile);
 
     if( response.success===false && throwError ) {
         throw response.error;
@@ -24,7 +24,7 @@ export function removeFile(pathToFile: string, throwError?:boolean):Response {
     return response;
 }
 
-function _removeFile(pathToFile: string):Response {
+function _removeFileSync(pathToFile: string):Response {
     const absolutePathToFile = absolute(pathToFile);
     try {
         if (!existsSync(absolutePathToFile)) {
