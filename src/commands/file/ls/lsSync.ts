@@ -24,8 +24,6 @@ type Response = SuccessResponse | {success: false, contents: PathInfo[], error: 
  * 
  * @param absolutePathDirectory Absolute path to the directory to list contents from.
  * @param options Optional filtering and behavior controls:
- * @param throwError Optional  throws an error instead of returning it 
- * 
  * - `recursive` — Whether to search subdirectories. Default: `false`
  * - `type` — `'file'`, `'dir'`, or `'both'`. Default: `'both'`
  * - `file_pattern` — Filter filenames by glob pattern (string) or RegExp. RegExp is slower. Default: `null`
