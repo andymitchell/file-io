@@ -6,6 +6,7 @@ import * as os from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { privatifyPath } from '../../../utils/privatifyPath.ts';
 
+
 // --- Test Setup: Create a realistic temporary file structure ---
 
 let tempDir: string;
@@ -129,10 +130,10 @@ describe('getPackageDirectorySync: CWD Mode (`{type: "cwd"}`)', () => {
 });
 
 
-describe('getPackageDirectorySync: Container Mode (`{type: "container"}`)', () => {
+describe('getPackageDirectorySync: Container Mode (`{type: "esm-url"}`)', () => {
     it("should find the module's package.json when called from a file within a node_modules dependency", () => {
         const moduleFileUrl = pathToFileURL(moduleFilePath).toString();
-        const result = getPackageDirectorySync({ type: 'container', esmFileUrl: moduleFileUrl });
+        const result = getPackageDirectorySync({ type: 'esm-url', esmUrl: moduleFileUrl });
 
         expect(result.success).toBe(true);
         if (result.success) {
@@ -142,7 +143,7 @@ describe('getPackageDirectorySync: Container Mode (`{type: "container"}`)', () =
     
     it("should find the root project's package.json when called from a file in the project's src directory", () => {
         const srcFileUrl = pathToFileURL(srcFilePath).toString();
-        const result = getPackageDirectorySync({ type: 'container', esmFileUrl: srcFileUrl });
+        const result = getPackageDirectorySync({ type: 'esm-url', esmUrl: srcFileUrl });
 
         expect(result.success).toBe(true);
         if (result.success) {
@@ -155,7 +156,7 @@ describe('getPackageDirectorySync: Container Mode (`{type: "container"}`)', () =
         fs.writeFileSync(orphanFilePath, '// I have no home');
         const orphanFileUrl = pathToFileURL(orphanFilePath).toString();
 
-        const result = getPackageDirectorySync({ type: 'container', esmFileUrl: orphanFileUrl });
+        const result = getPackageDirectorySync({ type: 'esm-url', esmUrl: orphanFileUrl });
 
         expect(result.success).toBe(false);
         expect(result.packageJsonPath).toBeUndefined();
@@ -163,6 +164,73 @@ describe('getPackageDirectorySync: Container Mode (`{type: "container"}`)', () =
             expect(result.error).toBeInstanceOf(Error);
             expect(result.error.message).toContain('Could not find package.json');
             expect(result.error.message).toContain('Are you calling this from a script that is a node project?');
+        }
+    });
+});
+
+
+describe('getPackageDirectorySync: Container Mode (`{type: "path"}`)', () => {
+    it("should find the module's package.json when called from a file within a node_modules dependency", () => {
+        const result = getPackageDirectorySync({ type: 'path', path: moduleFilePath });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.packageJsonPath).toBe(modulePackageJsonPath);
+        }
+    });
+    
+    it("should find the root project's package.json when called from a file in the project's src directory", () => {
+        const result = getPackageDirectorySync({ type: 'path', path: srcFilePath });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.packageJsonPath).toBe(rootPackageJsonPath);
+        }
+    });
+
+    it("can handle relative to the current cwd", () => {
+        const result = getPackageDirectorySync({ type: 'path', path: './src/srcFile.ts' });
+
+        expect(result.success).toBe(true);
+        if( result.success ) {
+            expect(result.packageJsonPath).toBe(privatifyPath(rootPackageJsonPath));
+        }
+    });
+
+
+    it("can handle a directory", () => {
+        const result = getPackageDirectorySync({ type: 'path', path: myPackageDir });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.packageJsonPath).toBe(modulePackageJsonPath);
+        }
+    });
+
+    it('should fail gracefully if the container file has no associated package.json', () => {
+        const orphanFilePath = path.join(emptyDir, 'orphan.js');
+        fs.writeFileSync(orphanFilePath, '// I have no home');
+
+        const result = getPackageDirectorySync({ type: 'path', path: orphanFilePath });
+
+        expect(result.success).toBe(false);
+        expect(result.packageJsonPath).toBeUndefined();
+        if(!result.success){
+            expect(result.error).toBeInstanceOf(Error);
+            expect(result.error.message).toContain('Could not find package.json');
+            expect(result.error.message).toContain('Are you calling this from a script that is a node project?');
+        }
+    });
+
+
+    it('should fail gracefully if the path does not exist', () => {
+        const result = getPackageDirectorySync({ type: 'path', path: './random/does/not/exists.ts' });
+
+        expect(result.success).toBe(false);
+        expect(result.packageJsonPath).toBeUndefined();
+        if(!result.success){
+            expect(result.error).toBeInstanceOf(Error);
+            expect(result.error.message).toContain('Could not verify startDirectory');
         }
     });
 });
@@ -189,10 +257,10 @@ describe('getPackageDirectorySync: Error Handling and Edge Cases', () => {
         expect(result.packageJsonPath).toBe(privatifyPath(rootPackageJsonPath));
     });
 
-    it('should return a success:false result when an invalid esmFileUrl is provided', () => {
+    it('should return a success:false result when an invalid esmUrl is provided', () => {
         // An invalid file URL will cause the internal `thisDir` (via `fileURLToPath`) to throw
         const badUrl = 'this-is-not-a-valid-url';
-        const result = getPackageDirectorySync({ type: 'container', esmFileUrl: badUrl });
+        const result = getPackageDirectorySync({ type: 'esm-url', esmUrl: badUrl });
 
         expect(result.success).toBe(false);
         expect(result.packageJsonPath).toBeUndefined();
@@ -201,12 +269,12 @@ describe('getPackageDirectorySync: Error Handling and Edge Cases', () => {
         expect(result.error?.message).toContain('Invalid URL');
     });
 
-    it('should gracefully handle non-existent file paths in esmFileUrl', () => {
+    it('should gracefully handle non-existent file paths in esmUrl', () => {
         const nonExistentFile = path.join(myPackageDir, 'nonexistent.js');
         const nonExistentFileUrl = pathToFileURL(nonExistentFile).toString();
 
         // This should still work because find-up starts from the directory, which *does* exist
-        const result = getPackageDirectorySync({ type: 'container', esmFileUrl: nonExistentFileUrl });
+        const result = getPackageDirectorySync({ type: 'esm-url', esmUrl: nonExistentFileUrl });
         
         expect(result.success).toBe(true);
         if (result.success) {
