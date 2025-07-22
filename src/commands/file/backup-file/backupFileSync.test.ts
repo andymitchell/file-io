@@ -64,7 +64,7 @@ describe('backupFileSync', () => {
         expect(faultyBackup).toThrow("Only supports files");
     });
 
-    test.only('should create a backup of a file with the default naming scheme', () => {
+    test('should create a backup of a file with the default naming scheme', () => {
         const filePath = path.join(testDir, 'test.txt');
         const content = 'Hello, Vitest!';
         writeFileSync(filePath, content);
