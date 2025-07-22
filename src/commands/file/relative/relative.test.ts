@@ -1,11 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { promises as fs, rmSync } from 'node:fs';
+import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
 import { inferIsDirectory, relative } from './relative.ts';
 
-import { dirname, relative as nodeRelative } from "node:path";
 import { stripTrailingSep } from '../strip-trailing-sep/stripTrailingSep.ts';
 
 // This describe block encapsulates all tests for the 'relative' function.

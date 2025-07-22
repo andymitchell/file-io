@@ -1,14 +1,17 @@
 import { copyFileSync as nodeCopyFileSync, existsSync, mkdirSync } from "node:fs";
 import { getErrorMessage } from "../../../utils/getErrorMessage.ts";
 import { pathInfoSync } from "../path-info/pathInfoSync.ts";
-import path from "node:path";
+import { basename, dirname, join, resolve, sep } from "node:path";
+
 
 type Options = {
     overwrite?: boolean
 }
 
+type Response = {success: true, absoluteDestinationFile: string, error?: undefined} | {success: false, absoluteDestinationFile?: undefined, error: Error}
+
 /**
- * Copies a file to a destination path, which may be a directory or a specific file path.
+ * Copies a file to a destination path, which may be a directory or a specific file 
  *
  * - Automatically creates the destination directory if it doesn't exist.
  * - Optionally overwrites an existing file.
@@ -17,10 +20,10 @@ type Options = {
  *   The path to the file you want to copy. Must refer to an existing file.
  *
  * @param destination
- *   The target path. Can be:
+ *   The target  Can be:
  *     - A directory (ending in a path separator or existing as a directory) — the file
  *       will be copied into that directory, preserving its original basename.
- *     - A file path — the file will be copied to exactly this path.
+ *     - A file path — the file will be copied to exactly this 
  *
  * @param options
  * @param options.overwrite If `true`, allows overwriting an existing file at the destination. Defaults to `false`.
@@ -54,7 +57,14 @@ type Options = {
  * }
  * 
  */
-export function copyFileSync(source: string, destination: string, options?: Options):{success: true, absoluteDestinationFile: string, error?: undefined} | {success: false, absoluteDestinationFile?: undefined, error: Error} {
+export function copyFileSync(source: string, destination: string, options?: Options, throwError?:boolean):Response {
+    const response = _copyFileSync(source, destination, options);
+    if( response.success===false && throwError ) {
+        throw response.error;
+    }
+    return response;
+}
+function _copyFileSync(source: string, destination: string, options?: Options):Response {
     try {
         if (!existsSync(source)) {
             return { success: false, error: new Error(`Source file does not exist: ${source}`) };
@@ -64,19 +74,19 @@ export function copyFileSync(source: string, destination: string, options?: Opti
         if (existsSync(destination)) {
             const info = pathInfoSync(destination, true);
             isDestDirectory = info.type==='dir';
-        } else if (destination.endsWith(path.sep) || destination.endsWith('/')) {
+        } else if (destination.endsWith(sep) || destination.endsWith('/')) {
             isDestDirectory = true;
         }
 
         const finalDestination = isDestDirectory
-            ? path.join(destination, path.basename(source))
+            ? join(destination, basename(source))
             : destination;
 
         if (existsSync(finalDestination) && !options?.overwrite) {
             return { success: false, error: new Error(`Destination file already exists and overwrite is not enabled: ${finalDestination}`) };
         }
 
-        const destDir = path.dirname(finalDestination);
+        const destDir = dirname(finalDestination);
         if (!existsSync(destDir)) {
             mkdirSync(destDir, { recursive: true });
         }
@@ -85,7 +95,7 @@ export function copyFileSync(source: string, destination: string, options?: Opti
 
         return {
             success: true,
-            absoluteDestinationFile: path.resolve(finalDestination),
+            absoluteDestinationFile: resolve(finalDestination),
         };
     } catch (e) {
         return { success: false, error: new Error(`Cannot copy file from ${source} to ${destination}. Error: ${getErrorMessage(e)}`) };

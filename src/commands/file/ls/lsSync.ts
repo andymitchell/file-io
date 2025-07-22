@@ -6,10 +6,12 @@ import type { LsOptions } from './types.ts';
 import { getErrorMessage } from '../../../utils/getErrorMessage.ts';
 import type { PathInfo } from '../path-info/types.ts';
 import { pathInfoSync } from '../path-info/pathInfoSync.ts';
+import { absolute } from '../absolute/absolute.ts';
+import { statSync } from 'fs';
 
 
 
-
+type Response = {success: true, contents: PathInfo[], error?: undefined} | {success: false, contents: PathInfo[], error: Error};
 
 
 /**
@@ -20,6 +22,7 @@ import { pathInfoSync } from '../path-info/pathInfoSync.ts';
  * 
  * @param absolutePathDirectory Absolute path to the directory to list contents from.
  * @param options Optional filtering and behavior controls:
+ * @param throwError Optional  throws an error instead of returning it 
  * 
  * - `recursive` — Whether to search subdirectories. Default: `false`
  * - `type` — `'file'`, `'dir'`, or `'both'`. Default: `'both'`
@@ -62,7 +65,35 @@ import { pathInfoSync } from '../path-info/pathInfoSync.ts';
  *   ignore: ['** /node_modules/**']  // remove space in the glob pattern
  * });
  */
-export function lsSync(absolutePathDirectory: string, options?: LsOptions):PathInfo[] {
+export function lsSync(pathToDirectory: string, options?: LsOptions, throwError?: boolean):Response {
+    try {
+        const contents = _lsSync(pathToDirectory, options);
+
+        return {success: true, contents}
+    } catch(e) {
+        let error:Error;
+        if( e instanceof Error ) {
+            error = e;
+        } else {
+            let serializedError:string | undefined;
+            try {
+                serializedError = JSON.stringify(e);
+            } catch(e) {}
+            error = new Error(`Unknown error: ${serializedError ?? 'na'}`);
+        }
+        
+
+        if( throwError ) {
+            throw error;
+        } else {
+            return {success: false, error, contents: [] };
+        }
+    }
+
+    
+}
+
+function _lsSync(pathToDirectory: string, options?: LsOptions):PathInfo[] {
     /* Design decisions:
     - use glob, even though it's large
         - this is a node-thing, not web. Size isn't a huge problem. 
@@ -70,6 +101,8 @@ export function lsSync(absolutePathDirectory: string, options?: LsOptions):PathI
         - it follows symlinks and will hang forever if they're circular 
     */
 
+
+    
 
     // Set default options
     if( options?.file_pattern ) options.type = 'file';
@@ -84,6 +117,13 @@ export function lsSync(absolutePathDirectory: string, options?: LsOptions):PathI
     };
 
     try {
+
+        const absolutePathDirectory = absolute(pathToDirectory);
+
+        if( !statSync(absolutePathDirectory).isDirectory() ) {
+            throw new Error(`This only works on directories. Not a directory: ${absolutePathDirectory}`);
+        }
+
         // If file_pattern is a string, weave it into the glob pattern for efficiency.
         // Otherwise, use a broad pattern that will be filtered later by the RegExp.
         const fileMatchPattern = typeof safeOptions.file_pattern === 'string'
@@ -146,7 +186,7 @@ export function lsSync(absolutePathDirectory: string, options?: LsOptions):PathI
         }
 
     } catch (e) {
-        throw new Error(`Cannot list files for ${absolutePathDirectory}. Error: ${getErrorMessage(e)}`);
+        throw new Error(`Cannot list files for ${pathToDirectory}. Error: ${getErrorMessage(e)}`);
     }
 }
 

@@ -65,7 +65,7 @@ describe('lsSync', () => {
 
     describe('Return value structure', () => {
         it('should return objects with basename, dirname, and an absolute uri', () => {
-            const result = lsSync(tempDir, { file_pattern: 'file1.ts' });
+            const result = lsSync(tempDir, { file_pattern: 'file1.ts' })?.contents;
 
             expect(result).toHaveLength(1);
             const file = result[0]!;
@@ -81,7 +81,7 @@ describe('lsSync', () => {
 
     describe('recursive option', () => {
         it('should NOT find files in subdirectories by default', () => {
-            const results = lsSync(tempDir);
+            const results = lsSync(tempDir)?.contents;
             const fileNames = results.filter(f => f.type==='file').map(f => f.basename);
 
             expect(fileNames).toContain('file1.ts');
@@ -89,7 +89,7 @@ describe('lsSync', () => {
         });
 
         it('should find files in subdirectories when recursive is true', () => {
-            const results = lsSync(tempDir, { recursive: true });
+            const results = lsSync(tempDir, { recursive: true })?.contents;
             const fileNames = results.filter(f => f.type==='file').map(f => f.basename);
             
             expect(fileNames).toContain('file1.ts');
@@ -103,8 +103,8 @@ describe('lsSync', () => {
             const globPattern = '**/*.ts'; // double-star to match recursive: true
             const regExpPattern = /\.ts$/;
 
-            const fromGlob = lsSync(tempDir, { file_pattern: globPattern, recursive: true });
-            const fromRegExp = lsSync(tempDir, { file_pattern: regExpPattern, recursive: true });
+            const fromGlob = lsSync(tempDir, { file_pattern: globPattern, recursive: true })?.contents;
+            const fromRegExp = lsSync(tempDir, { file_pattern: regExpPattern, recursive: true })?.contents;
 
             // Sort to ensure order doesn't affect comparison
             expect(sortResults(fromGlob)).toEqual(sortResults(fromRegExp));
@@ -115,7 +115,7 @@ describe('lsSync', () => {
             const results = lsSync(tempDir, { 
                 file_pattern: /file\d\.(ts|js)/, 
                 recursive: true 
-            });
+            })?.contents;
 
             expect(sortResults(results).map(r => r.type==='file' && r.basename)).toEqual(['file1.ts', 'file2.js']);
         });
@@ -124,23 +124,23 @@ describe('lsSync', () => {
             const results1 = lsSync(tempDir, {
                 file_pattern: 'src',
                 recursive: true
-            })
+            })?.contents
             expect(results1.length).toBe(0);
 
             const results2 = lsSync(tempDir, {
                 file_pattern: /src/,
                 recursive: true
-            })
+            })?.contents
             expect(results2.length).toBe(0);
 
-            const actuallyHasSrc = lsSync(tempDir, {recursive: true});
+            const actuallyHasSrc = lsSync(tempDir, {recursive: true})?.contents;
             expect(actuallyHasSrc.some(x => x.type==='dir' && x.uri.endsWith('src'))).toBe(true);
         })
     });
 
     describe('type option', () => {
         it('returns files', () => {
-            const results = lsSync(tempDir, {type: 'file'});
+            const results = lsSync(tempDir, {type: 'file'})?.contents;
 
             expect(results.length).toBeGreaterThan(0);
             console.log({results})
@@ -148,7 +148,7 @@ describe('lsSync', () => {
         })
 
         it('returns directories', () => {
-            const results = lsSync(tempDir, {type: 'dir'});
+            const results = lsSync(tempDir, {type: 'dir'})?.contents;
 
             expect(results.length).toBeGreaterThan(0);
             console.log({results})
@@ -158,14 +158,14 @@ describe('lsSync', () => {
 
     describe('Symbolic links', () => {
         it('should NOT follow symlinks by default', () => {
-            const results = lsSync(tempDir, { recursive: true });
+            const results = lsSync(tempDir, { recursive: true })?.contents;
             const found = results.some(file => file.type==='file' && file.basename === 'linked-file.ts');
 
             expect(found).toBe(false);
         });
 
         it('should follow symlinks when follow: true is set', () => {
-            const results = lsSync(tempDir, { recursive: true, follow: true });
+            const results = lsSync(tempDir, { recursive: true, follow: true })?.contents;
             const found = results.some(file => file.type==='file' && file.basename === 'linked-file.ts');
 
             expect(found).toBe(true);
@@ -177,7 +177,7 @@ describe('lsSync', () => {
             const results = lsSync(tempDir, { 
                 recursive: true, 
                 ignore: ['**/.git/**'] 
-            });
+            })?.contents;
             const foundGitConfig = results.some(file => file.type==='file' && file.uri.includes('.git'));
             
             expect(foundGitConfig).toBe(false);
@@ -201,12 +201,93 @@ describe('lsSync', () => {
                 follow: true, 
             };
 
-            const results = lsSync(tempDir, { ...simpleOptions, globOptions });
+            const results = lsSync(tempDir, { ...simpleOptions, globOptions })?.contents;
             
             // Test if follow was overridden: 'linked-file.ts' should be found
             const foundLinkedFile = results.some(r => r.type==='file' && r.basename === 'linked-file.ts');
             expect(foundLinkedFile, "globOptions 'follow: true' should override 'follow: false'").toBe(true);
 
+        });
+    });
+
+
+    describe('Error Handling and Invalid Input', () => {
+        it('should return a failure response when path is a file, not a directory', () => {
+            const filePath = join(tempDir, 'file1.ts');
+            const result = lsSync(filePath);
+
+            expect(result.success).toBe(false);
+            expect(result.contents).toEqual([]);
+            expect(result.error).toBeInstanceOf(Error);
+            expect(result.error?.message).toContain('This only works on directories');
+        });
+
+        it('should return a failure response for a non-existent directory', () => {
+            const nonExistentPath = join(tempDir, 'non-existent-dir');
+            const result = lsSync(nonExistentPath);
+
+            expect(result.success).toBe(false);
+            expect(result.contents).toEqual([]);
+            expect(result.error).toBeInstanceOf(Error);
+            expect(result.error?.message).toContain('Cannot list files');
+        });
+    });
+
+
+    describe('throwError option', () => {
+        it('should return an error object by default when the path is invalid', () => {
+            const filePath = join(tempDir, 'file1.ts'); // Invalid input
+            
+            // No try/catch needed, as it should return the error
+            const result = lsSync(filePath, undefined, false);
+
+            expect(result.success).toBe(false);
+            expect(result.error).toBeInstanceOf(Error);
+        });
+
+        it('should throw an error on invalid path when throwError is true', () => {
+            const filePath = join(tempDir, 'file1.ts'); // Invalid input
+
+            // Expect the function to throw an actual exception
+            expect(() => {
+                lsSync(filePath, undefined, true);
+            }).toThrow('This only works on directories');
+        });
+    });
+
+
+    describe('Edge Cases', () => {
+        let edgeCaseDir: string;
+
+        beforeAll(async () => {
+            edgeCaseDir = join(tempDir, 'edge-cases');
+            await mkdir(edgeCaseDir, { recursive: true });
+        });
+
+        it('should return an empty array for an empty directory', async () => {
+            const emptyDir = join(edgeCaseDir, 'empty');
+            await mkdir(emptyDir);
+
+            const result = lsSync(emptyDir)?.contents;
+            expect(result).toEqual([]);
+
+            await rm(emptyDir, { recursive: true, force: true });
+        });
+
+        it('should return an empty array if all contents are ignored', async () => {
+            const ignoredDir = join(edgeCaseDir, 'ignored-content');
+            await mkdir(ignoredDir);
+            await writeFile(join(ignoredDir, 'temp.log'), 'log data');
+            await writeFile(join(ignoredDir, 'another.tmp'), 'temp data');
+
+            const result = lsSync(ignoredDir, {
+                recursive: true,
+                ignore: ['**/*.log', '**/*.tmp']
+            })?.contents;
+
+            expect(result).toEqual([]);
+
+            await rm(ignoredDir, { recursive: true, force: true });
         });
     });
 });
