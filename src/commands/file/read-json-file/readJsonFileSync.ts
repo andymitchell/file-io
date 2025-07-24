@@ -30,7 +30,7 @@ type ReadJsonWithUndefined = {object:Record<string, any> | undefined, file_found
  *
  * @example
  * // 1. Read a file, no default: returns `object` or `undefined`
- * const result1 = readJsonFile('/path/to/config.json');
+ * const result1 = readJsonFileSync('/path/to/config.json');
  * if (!result1.file_found) {
  *   console.warn('Missing file; nothing to do.');
  * }
@@ -43,7 +43,7 @@ type ReadJsonWithUndefined = {object:Record<string, any> | undefined, file_found
  *
  * @example
  * // 2. Provide a default object if file is missing or broken:
- * const { object, file_found, error } = readJsonFile(
+ * const { object, file_found, error } = readJsonFileSync(
  *   '/path/to/optional.json',
  *   { fallback: true }
  * );
@@ -55,7 +55,7 @@ type ReadJsonWithUndefined = {object:Record<string, any> | undefined, file_found
  *
  * @example
  * // 3. Force strict JSON parsing (no comments/trailing commas):
- * const strictResult = readJsonFile(
+ * const strictResult = readJsonFileSync(
  *   '/strict.json',
  *   {},
  *   { vanilla_json: true }
@@ -64,9 +64,9 @@ type ReadJsonWithUndefined = {object:Record<string, any> | undefined, file_found
  *   console.error('Strict parsing failed:', strictResult.error);
  * }
  */
-export function readJsonFile(pathToFile: string | undefined, defaultObject?:undefined, options?:Options):ReadJsonWithUndefined;
-export function readJsonFile(pathToFile: string | undefined, defaultObject:DefaultObject, options?:Options):ReadJson;
-export function readJsonFile(pathToFile: string | undefined, defaultObject?:DefaultObject, options?:Options):ReadJsonWithUndefined {
+export function readJsonFileSync(pathToFile: string | undefined, defaultObject?:undefined, options?:Options):ReadJsonWithUndefined;
+export function readJsonFileSync(pathToFile: string | undefined, defaultObject:DefaultObject, options?:Options):ReadJson;
+export function readJsonFileSync(pathToFile: string | undefined, defaultObject?:DefaultObject, options?:Options):ReadJsonWithUndefined {
     const fileUri = pathToFile? absolute(pathToFile) : undefined;
     if( !fileUri ) return missingFileUriReadJson(fileUri, defaultObject);
 

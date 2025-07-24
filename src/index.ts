@@ -3,7 +3,7 @@ import { copyFileSync } from "./commands/file/copy-file/copyFileSync.ts";
 import { getPackageDirectorySync } from "./commands/file/get-package-directory/getPackageDirectorySync.ts";
 import { lsSync } from "./commands/file/ls/lsSync.ts";
 import { pathInfoSync } from "./commands/file/path-info/pathInfoSync.ts";
-import { readJsonFile } from "./commands/file/read-json-file/readJsonFile.ts";
+import { readJsonFileSync } from "./commands/file/read-json-file/readJsonFileSync.ts";
 import { relative } from "./commands/file/relative/relative.ts";
 import { removeDirectorySync } from "./commands/file/remove-directory/removeDirectorySync.ts";
 import { removeFileSync } from "./commands/file/remove-file/removeFileSync.ts";
@@ -19,7 +19,7 @@ export {
     copyFileSync,
     lsSync,
     pathInfoSync,
-    readJsonFile,
+    readJsonFileSync,
     relative,
     removeDirectorySync,
     removeFileSync, 
