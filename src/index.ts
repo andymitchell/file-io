@@ -1,3 +1,4 @@
+import { absolute } from "./commands/file/absolute/absolute.ts";
 import { backupFileSync } from "./commands/file/backup-file/backupFileSync.ts";
 import { copyFileSync } from "./commands/file/copy-file/copyFileSync.ts";
 import { getPackageDirectorySync } from "./commands/file/get-package-directory/getPackageDirectorySync.ts";
@@ -20,6 +21,7 @@ export {
     lsSync,
     pathInfoSync,
     readJsonFileSync,
+    absolute,
     relative,
     removeDirectorySync,
     removeFileSync, 
